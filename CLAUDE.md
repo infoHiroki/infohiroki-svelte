@@ -97,24 +97,180 @@ infohiroki-svelte/
 
 ## 🎯 開発原則
 
-### 設計思想
-- **Pixel Perfect**: 既存デザインの完全再現
-- **KISS (Keep It Simple, Stupid)**:
-  - 複雑なデータベース不要、ビルド時静的生成
-  - 必要最小限の機能のみ実装
-  - 理解しやすく保守しやすいコード
-- **YAGNI (You Aren't Gonna Need It)**:
-  - 将来的に必要になるかもしれない機能は実装しない
-  - 現在必要な機能のみに集中
-- **DRY (Don't Repeat Yourself)**:
-  - コンポーネントの再利用
-  - 共通処理の関数化
+### 設計思想（KISS・YAGNI・DRY・Golangの哲学を踏襲）
+
+#### 1. KISS (Keep It Simple, Stupid)
+**シンプルさを最優先する設計**
+
+- ✅ **複雑なデータベース不要**: ファイルベース、ビルド時静的生成で十分
+- ✅ **必要最小限の機能**: 現在必要な機能のみを実装
+- ✅ **理解しやすいコード**: 誰が読んでも分かるコード、コメント不要なほど明確
+- ✅ **直感的な構造**: ディレクトリ構造、命名規則がプロジェクトの意図を反映
+- ❌ **過度な抽象化禁止**: 将来の拡張性のための過度な抽象化は避ける
+- ❌ **魔法の回避**: マクロ、メタプログラミング等の「魔法」を使わない
+
+**実践例:**
+```typescript
+// ✅ Good: シンプルで明確
+export function getAllPosts(): BlogPost[] {
+  const fileNames = fs.readdirSync(postsDirectory);
+  return fileNames
+    .filter(fileName => fileName.endsWith('.md'))
+    .map(parseMarkdownFile)
+    .sort((a, b) => (a.date > b.date ? -1 : 1));
+}
+
+// ❌ Bad: 過度な抽象化
+class PostRepository implements IRepository<BlogPost> {
+  constructor(private strategy: ILoadStrategy) {}
+  // 不要な複雑性...
+}
+```
+
+#### 2. YAGNI (You Aren't Gonna Need It)
+**今必要でない機能は実装しない**
+
+- ✅ **現在の要件のみ実装**: 将来使うかもしれない機能は実装しない
+- ✅ **機能追加は後から**: 必要になってから実装する（リファクタリング前提）
+- ✅ **仕様のオーバーエンジニアリング回避**: 現状の102記事で十分なら拡張不要
+- ❌ **"将来のため"禁止**: 検索機能、タグフィルタリング等は必要になってから
+- ❌ **汎用化の罠**: 「いつか使う」ための汎用関数は作らない
+
+**実践例:**
+```typescript
+// ✅ Good: 今必要な機能のみ
+export function getPostBySlug(slug: string): BlogPost | null {
+  const fullPath = path.join(postsDirectory, `${slug}.md`);
+  // シンプルに1記事取得
+}
+
+// ❌ Bad: 不要な汎用化
+export function getPostsByQuery(query: QueryBuilder): BlogPost[] {
+  // 今は使わない複雑な検索機能...
+}
+```
+
+#### 3. DRY (Don't Repeat Yourself)
+**重複を避け、再利用可能にする**
+
+- ✅ **コンポーネントの再利用**: Header/Footerなど共通UIパーツは1箇所で管理
+- ✅ **共通処理の関数化**: Markdown解析、日付ソート等は関数化
+- ✅ **型定義の一元管理**: `BlogPost`型を1箇所で定義、全体で再利用
+- ✅ **CSSの再利用**: 既存の1,958行CSSをそのまま活用、重複スタイル削除
+- ❌ **コピペ禁止**: 同じコードを2箇所に書かない
+- ❌ **マジックナンバー禁止**: 定数は名前付きで定義
+
+**実践例:**
+```typescript
+// ✅ Good: 共通処理を関数化
+function parseMarkdownFile(fileName: string): BlogPost {
+  const slug = fileName.replace(/\.md$/, '');
+  const fullPath = path.join(postsDirectory, fileName);
+  const fileContents = fs.readFileSync(fullPath, 'utf8');
+  const { data, content } = matter(fileContents);
+  return { /* BlogPost */ };
+}
+
+// ❌ Bad: 同じ処理を2箇所に書く
+// getAllPosts() 内でMarkdown解析
+// getPostBySlug() 内でも同じMarkdown解析
+```
+
+#### 4. Golang哲学の踏襲
+**Go言語の設計思想をTypeScript/SvelteKitに適用**
+
+##### 4.1. 明示的であること（Explicit over Implicit）
+- ✅ **型は明示的**: `any`型禁止、すべて明示的に型定義
+- ✅ **エラーハンドリング明示**: try-catchで明示的にエラー処理
+- ✅ **null安全**: `| null`型で明示的にnull許容を表現
+- ❌ **暗黙的型変換禁止**: TypeScript strict mode有効化
+
+```typescript
+// ✅ Good: 明示的な型とエラーハンドリング
+export function getPostBySlug(slug: string): BlogPost | null {
+  try {
+    const fullPath = path.join(postsDirectory, `${slug}.md`);
+    const fileContents = fs.readFileSync(fullPath, 'utf8');
+    return parsePost(fileContents);
+  } catch (error) {
+    console.error(`記事が見つかりません: ${slug}`, error);
+    return null; // 明示的にnullを返す
+  }
+}
+
+// ❌ Bad: 暗黙的なエラー無視
+export function getPostBySlug(slug: string): BlogPost {
+  const file = fs.readFileSync(`${slug}.md`, 'utf8'); // エラー時の挙動不明
+  return parsePost(file);
+}
+```
+
+##### 4.2. 正統性（Orthogonality）
+- ✅ **1つの責任**: 関数・コンポーネントは1つの責任のみ持つ
+- ✅ **疎結合**: モジュール間の依存を最小化
+- ✅ **高凝集**: 関連する機能は1箇所に集める
+
+```typescript
+// ✅ Good: 責任分離
+// posts.ts: データ取得のみ
+// +page.server.ts: ルーティング・データ渡し
+// +page.svelte: UI表示のみ
+
+// ❌ Bad: 責任混在
+// posts.ts内でUIロジックも含む
+```
+
+##### 4.3. 小さなインターフェース（Small Interfaces）
+- ✅ **最小限のAPI**: 公開関数は必要最小限のみ
+- ✅ **シンプルな型定義**: `BlogPost`型は7フィールドのみ
+- ❌ **肥大化防止**: 不要なメソッド・プロパティを追加しない
+
+```typescript
+// ✅ Good: 必要最小限のAPI
+export function getAllPosts(): BlogPost[] { /* */ }
+export function getPostBySlug(slug: string): BlogPost | null { /* */ }
+export function getPostCount(): number { /* */ }
+
+// ❌ Bad: 不要なメソッド追加
+export function getPostsByTag(tag: string): BlogPost[] { /* */ } // 今は不要
+export function searchPosts(query: string): BlogPost[] { /* */ } // 今は不要
+```
+
+##### 4.4. 組み込みの優先（Use Built-in）
+- ✅ **標準ライブラリ優先**: Node.js標準の`fs`、`path`を活用
+- ✅ **軽量ライブラリ**: `marked`、`gray-matter`のみ、大規模FW不要
+- ❌ **過度な依存禁止**: 不要なnpmパッケージは追加しない
+
+##### 4.5. テスタビリティ（Design for Testing）
+- ✅ **純粋関数**: 副作用のない関数を優先（テスト容易）
+- ✅ **関数の分割**: 小さな関数に分割してユニットテスト可能に
+- ✅ **型安全**: TypeScript strict modeでコンパイル時エラー検出
 
 ### コーディング規約
-- **TypeScript**: 厳格な型チェック有効（strict mode）
-- **命名**: camelCase（変数・関数）、PascalCase（型・コンポーネント）
-- **Svelte**: 単一ファイルコンポーネント（.svelte）
-- **Gitコミット**: 絵文字 + 日本語（アトミックコミット原則）
+
+#### 命名規則
+- **変数・関数**: `camelCase`（例: `getAllPosts`, `blogPost`）
+- **型・インターフェース**: `PascalCase`（例: `BlogPost`, `PageServerLoad`）
+- **コンポーネント**: `PascalCase`（例: `Header.svelte`, `BlogCard.svelte`）
+- **ファイル名**: `kebab-case`（例: `blog-list.svelte`）またはSvelteKit規約（`+page.svelte`）
+- **定数**: `UPPER_SNAKE_CASE`（例: `MAX_POSTS_PER_PAGE`）
+
+#### TypeScript厳格ルール
+- ✅ **strict mode有効**: `tsconfig.json`で`"strict": true`
+- ❌ **`any`型禁止**: すべて明示的に型定義
+- ❌ **`@ts-ignore`禁止**: 型エラーは修正する、無視しない
+- ✅ **null安全**: `| null`で明示的にnull許容を表現
+
+#### Svelteコンポーネントルール
+- ✅ **単一ファイルコンポーネント**: `.svelte`ファイル1つで完結
+- ✅ **Props型定義**: `export let data: PageData;`で型付け
+- ✅ **スタイルスコープ**: `<style>`タグはコンポーネント内スコープ
+- ✅ **ロジック分離**: 複雑なロジックは`src/lib/utils/`に分離
+
+#### Gitコミットルール
+- **フォーマット**: 絵文字 + 日本語 + アトミックコミット原則
+- **粒度**: 1コミット = 1つの論理的変更
+- **メッセージ**: 「何を」変更したかを明確に
 
 ### 移植品質基準
 - **ピクセル完全一致**: CSS 1,958行を100%維持
