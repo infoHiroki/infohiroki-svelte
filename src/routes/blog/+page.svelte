@@ -1,0 +1,120 @@
+<script lang="ts">
+  import type { PageData } from './$types';
+  
+  export let data: PageData;
+  const { posts } = data;
+</script>
+
+<svelte:head>
+  <title>ブログ | infoHiroki</title>
+  <meta name="description" content="エンジニア・AI・生成AI・DXに関する技術ブログ記事一覧" />
+  <link rel="stylesheet" href="/css/style.css" />
+</svelte:head>
+
+<main class="container">
+  <section class="blog-header">
+    <h1>📝 ブログ</h1>
+    <p class="blog-count">全 {posts.length} 記事</p>
+  </section>
+
+  <section class="blog-list">
+    {#each posts as post}
+      <article class="blog-card">
+        <a href="/blog/{post.slug}">
+          <div class="card-header">
+            <span class="article-icon">{post.icon}</span>
+            <time datetime={post.date}>{post.date}</time>
+          </div>
+          <h2>{post.title}</h2>
+          <p class="description">{post.description}</p>
+          <div class="tags">
+            {#each post.tags as tag}
+              <span class="tag">{tag}</span>
+            {/each}
+          </div>
+        </a>
+      </article>
+    {/each}
+  </section>
+</main>
+
+<style>
+  /* 既存のstyle.cssを使用するため、追加のスタイルは最小限 */
+  .blog-header {
+    text-align: center;
+    margin: 2rem 0;
+  }
+  
+  .blog-count {
+    color: #666;
+    font-size: 0.9rem;
+  }
+  
+  .blog-list {
+    display: grid;
+    gap: 1.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .blog-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+  .blog-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .blog-card a {
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .article-icon {
+    font-size: 1.5rem;
+  }
+  
+  time {
+    color: #666;
+    font-size: 0.85rem;
+  }
+  
+  h2 {
+    margin: 0.5rem 0;
+    font-size: 1.3rem;
+    color: #333;
+  }
+  
+  .description {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0.5rem 0 1rem;
+    line-height: 1.6;
+  }
+  
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .tag {
+    background: #f0f0f0;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    color: #555;
+  }
+</style>
