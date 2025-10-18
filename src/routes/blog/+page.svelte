@@ -52,7 +52,7 @@
   
   .blog-list {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1.5rem;
     max-width: 1200px;
     margin: 0 auto;
@@ -76,6 +76,8 @@
     border-radius: 8px;
     padding: 1.5rem;
     transition: transform 0.2s, box-shadow 0.2s;
+    min-width: 0;
+    overflow: hidden;
   }
   
   .blog-card:hover {
@@ -108,6 +110,8 @@
     margin: 0.5rem 0;
     font-size: 1.3rem;
     color: #333;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
   
   .description {
@@ -115,6 +119,8 @@
     font-size: 0.9rem;
     margin: 0.5rem 0 1rem;
     line-height: 1.6;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
   
   .tags {
