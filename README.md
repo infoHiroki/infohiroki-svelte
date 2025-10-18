@@ -12,8 +12,8 @@ Go版からTypeScript/SvelteKitに完全移行したポートフォリオサイ�
 
 ## プロジェクト構成
 
-- 記事数: 95記事（Markdown）
-- ページ数: 9ページ
+- 記事数: 102記事（Markdown）
+- ページ数: 10ページ（Home, Blog, Services, Products, Results, About, FAQ, Contact, Error, 個別記事）
 - 完全静的サイト生成（SSG）
 
 ## ローカル開発
@@ -48,6 +48,20 @@ Cloudflare Pagesが自動的にビルド・デプロイします。
 
 - [infohiroki-go](../infohiroki-go) - Go + Gin版（アーカイブ）
 
+## 主な機能
+
+- レスポンシブデザイン（モバイル/タブレット/デスクトップ対応）
+- ブログ記事一覧（3カラムグリッド）
+- Markdownベースのブログシステム
+- SEO対応（OGP、Twitterカード）
+- 404エラーページ
+
+## 最近の更新
+
+- 2025-10-19: ブログカードグリッドレイアウト修正（均等幅、オーバーフロー対応）
+- 2025-10-19: 全ページ移行完了（Go版からSvelteKitへ）
+- 2025-10-18: プロジェクト初期セットアップ
+
 ---
 
-Last Updated: 2025-10-18
+Last Updated: 2025-10-19
