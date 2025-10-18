@@ -52,9 +52,22 @@
   
   .blog-list {
     display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
-    max-width: 800px;
+    max-width: 1200px;
     margin: 0 auto;
+  }
+
+  @media (max-width: 1024px) {
+    .blog-list {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .blog-list {
+      grid-template-columns: 1fr;
+    }
   }
   
   .blog-card {
