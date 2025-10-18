@@ -9,9 +9,9 @@ const postsDirectory = path.join(process.cwd(), 'src/lib/content/blog');
 /**
  * 全記事を取得（日付降順）
  */
-export async function getAllPosts(): Promise<BlogPost[]> {
+export function getAllPosts(): BlogPost[] {
   const fileNames = fs.readdirSync(postsDirectory);
-  
+
   const posts = fileNames
     .filter(fileName => fileName.endsWith('.md'))
     .map(fileName => {
@@ -19,7 +19,7 @@ export async function getAllPosts(): Promise<BlogPost[]> {
       const fullPath = path.join(postsDirectory, fileName);
       const fileContents = fs.readFileSync(fullPath, 'utf8');
       const { data, content } = matter(fileContents);
-      
+
       return {
         slug: data.slug || slug,
         title: data.title || 'タイトル未設定',
@@ -31,19 +31,19 @@ export async function getAllPosts(): Promise<BlogPost[]> {
       } as BlogPost;
     })
     .sort((a, b) => (a.date > b.date ? -1 : 1)); // 日付降順
-  
+
   return posts;
 }
 
 /**
  * 個別記事を取得
  */
-export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
+export function getPostBySlug(slug: string): BlogPost | null {
   try {
     const fullPath = path.join(postsDirectory, `${slug}.md`);
     const fileContents = fs.readFileSync(fullPath, 'utf8');
     const { data, content } = matter(fileContents);
-    
+
     return {
       slug: data.slug || slug,
       title: data.title || 'タイトル未設定',
@@ -62,7 +62,7 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
 /**
  * 記事の総数を取得
  */
-export async function getPostCount(): Promise<number> {
-  const posts = await getAllPosts();
+export function getPostCount(): number {
+  const posts = getAllPosts();
   return posts.length;
 }
