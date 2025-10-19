@@ -57,6 +57,9 @@ infohiroki-svelte/
 │
 ├── src/
 │   ├── lib/
+│   │   ├── components/
+│   │   │   ├── Header.svelte   # モバイル/デスクトップ対応ヘッダー
+│   │   │   └── Footer.svelte   # フッターコンポーネント
 │   │   ├── types/
 │   │   │   └── blog.ts         # BlogPost型定義
 │   │   ├── utils/
@@ -69,27 +72,43 @@ infohiroki-svelte/
 │   │           └── ... (102ファイル)
 │   │
 │   └── routes/
+│       ├── +layout.svelte      # グローバルレイアウト
+│       ├── +layout.ts          # プリレンダー設定
+│       ├── +page.svelte        # ホームページ
+│       ├── +error.svelte       # 404エラーページ
 │       ├── blog/
 │       │   ├── +page.ts        # ブログ一覧データ取得
 │       │   ├── +page.svelte    # ブログ一覧ページ
 │       │   └── [slug]/
 │       │       ├── +page.ts    # 記事詳細データ取得
 │       │       └── +page.svelte # 記事詳細ページ
-│       └── (その他のページ - 未実装)
+│       ├── services/+page.svelte    # サービスページ
+│       ├── products/+page.svelte    # 開発製品ページ
+│       ├── results/+page.svelte     # 実績ページ
+│       ├── about/+page.svelte       # スキルスタックページ
+│       ├── faq/+page.svelte         # FAQページ
+│       └── contact/+page.svelte     # お問い合わせページ
 │
 ├── static/                     # 静的ファイル（完全移植済み）
 │   ├── css/
 │   │   └── style.css           # 1,958行CSS（Go版から完全コピー）
 │   ├── js/
 │   │   └── main.js             # JavaScript機能移植
-│   └── images/                 # 49個の画像ファイル
+│   └── images/                 # 100+個の画像ファイル
 │       ├── logo.svg
 │       ├── hero.svg
 │       ├── icons/              # 20個のブランドアイコン
 │       │   ├── claude.svg
 │       │   ├── notion.png
 │       │   └── ...
-│       └── note/               # ブログ画像
+│       └── note/               # ブログ画像（100+枚）
+│
+├── docs/                       # プロジェクトドキュメント
+│   ├── beginner-guide.html     # 初心者向けSvelteKitガイド
+│   ├── migration-story.html    # Go→SvelteKit移行ストーリー
+│   └── system-explanation.html # システム詳細説明
+│
+├── build/                      # 本番ビルド出力（静的サイト）
 │
 └── scripts/
     └── add-frontmatter.ts      # Frontmatter自動変換スクリプト
@@ -407,26 +426,29 @@ Node.jsバージョン: 20
 
 ## 📊 プロジェクト現状
 
-### ✅ 完了済み項目（約60%）
+### ✅ 完了済み項目（約90%）
 - [x] **プロジェクト初期化**: SvelteKit + TypeScript環境構築
-- [x] **静的ファイル移植**: CSS 1,958行、JavaScript、画像49個すべてコピー
+- [x] **静的ファイル移植**: CSS 1,958行、JavaScript、画像100+個すべてコピー
 - [x] **型定義**: BlogPost インターフェース作成
 - [x] **記事移植**: 102記事Markdown化 + frontmatter付与
 - [x] **Frontmatter変換スクリプト**: Go版ロジックをTypeScript移植
-- [x] **ユーティリティ実装**: getAllPosts(), getPostBySlug() 関数
-- [x] **ブログ一覧ページ**: /blog 完全実装
+- [x] **ユーティリティ実装**: getAllPosts(), getPostBySlug(), getPostCount() 関数
+- [x] **Header/Footerコンポーネント**: モバイル/デスクトップ対応サイドバー実装
+- [x] **グローバルレイアウト**: src/routes/+layout.svelte 実装完了
+- [x] **ホームページ**: ヒーロー、サービス、実績、About、LINE連絡セクション実装
+- [x] **ブログ一覧ページ**: /blog 3カラムグリッドレイアウト実装
 - [x] **ブログ詳細ページ**: /blog/[slug] 完全実装
+- [x] **その他固定ページ**: services, products, results, about, faq, contact すべて実装完了
+- [x] **404ページ**: +error.svelte エラーハンドリング実装
+- [x] **SEO対応**: 全ページOGP、Twitterカード、Canonical URL設定完了
+- [x] **プリレンダー設定**: 全ページ静的サイト生成設定、日本語ID警告抑制
+- [x] **本番ビルド**: npm run build テスト成功、build/ディレクトリ生成確認
+- [x] **HTMLガイド**: 初心者向けSvelteKitガイド、移行ストーリー、システム説明ドキュメント作成
 - [x] **開発サーバー確認**: localhost:5173で正常動作確認
-- [x] **Git初期化**: アトミックコミット7件（絵文字 + 日本語）
+- [x] **Git管理**: アトミックコミット原則に従った10+件のコミット（絵文字 + 日本語）
 
-### 🚧 未完了項目（約40%）
-- [ ] **Header/Footerコンポーネント**: 再利用可能なレイアウトパーツ
-- [ ] **グローバルレイアウト**: src/routes/+layout.svelte 実装
-- [ ] **ホームページ**: index.html 移植
-- [ ] **その他固定ページ**: services, products, results, about, faq, contact
-- [ ] **404ページ**: エラーハンドリング
-- [ ] **SEO対応**: sitemap.xml、OGP画像、構造化データ
-- [ ] **本番ビルド**: npm run build テスト
+### 🚧 未完了項目（約10%）
+- [ ] **sitemap.xml生成**: SEO追加最適化（オプション）
 - [ ] **Cloudflare Pagesデプロイ**: 本番公開
 - [ ] **Railway解約**: コスト削減完了
 
@@ -464,20 +486,19 @@ git commit -m "📝 CLAUDE.md更新"
 ## 🎯 次のステップ
 
 ### 優先度高（必須）
-1. **Header/Footerコンポーネント作成**
-2. **グローバルレイアウト実装**
-3. **ホームページ移植**
-4. **本番ビルドテスト**
+1. **Cloudflare Pagesデプロイ**: 本番公開
+2. **Railway解約**: コスト削減完了
 
 ### 優先度中（推奨）
-5. **その他固定ページ実装**
-6. **SEO対応（sitemap.xml等）**
-7. **Cloudflare Pagesデプロイ**
+3. **sitemap.xml生成**: SEO追加最適化
+4. **Google Analytics設定**: アクセス解析
+5. **ファビコン実装**: favicon.ico 作成
 
-### 優先度低（オプション）
-8. **検索機能実装**
-9. **ダークモード対応**
-10. **アクセス解析（Google Analytics等）**
+### 優先度低（オプション・YAGNI原則により実装見送り）
+6. **検索機能実装**: 全文検索
+7. **タグフィルタリング機能**: タグ別記事表示
+8. **ダークモード対応**: テーマ切り替え
+9. **コメント機能**: Giscus等の統合
 
 ## 📖 参考資料
 

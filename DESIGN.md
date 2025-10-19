@@ -108,38 +108,40 @@ date: "2024-03-29"
 - [x] TypeScript設定
 - [x] adapter-static インストール
 
-### Phase 2: 静的ファイル移行
-- [ ] CSS ファイルコピー
-- [ ] JavaScript ファイルコピー
-- [ ] 画像ファイルコピー
+### Phase 2: 静的ファイル移行 ✅
+- [x] CSS ファイルコピー（style.css: 1,958行）
+- [x] JavaScript ファイルコピー（main.js）
+- [x] 画像ファイルコピー（100+個）
 
-### Phase 3: Markdown記事準備
-- [ ] 95記事ファイルコピー
-- [ ] フロントマター変換スクリプト作成
-- [ ] 全記事フロントマター変換実行
+### Phase 3: Markdown記事準備 ✅
+- [x] 102記事ファイルコピー（95記事 + 追加7記事）
+- [x] フロントマター変換スクリプト作成
+- [x] 全記事フロントマター変換実行
 
-### Phase 4: コンポーネント実装
-- [ ] Header.svelte
-- [ ] Footer.svelte
-- [ ] ArticleCard.svelte
-- [ ] +layout.svelte
+### Phase 4: コンポーネント実装 ✅
+- [x] Header.svelte（モバイル/デスクトップ対応）
+- [x] Footer.svelte
+- [x] +layout.svelte（グローバルレイアウト）
+- [x] +layout.ts（プリレンダー設定）
 
-### Phase 5: ページ実装
-- [ ] ホームページ（/）
-- [ ] ブログ一覧（/blog）
-- [ ] ブログ記事詳細（/blog/[slug]）
-- [ ] その他固定ページ
+### Phase 5: ページ実装 ✅
+- [x] ホームページ（/）
+- [x] ブログ一覧（/blog）: 3カラムグリッドレイアウト
+- [x] ブログ記事詳細（/blog/[slug]）
+- [x] その他固定ページ（services, products, results, about, faq, contact）
+- [x] 404エラーページ（+error.svelte）
 
-### Phase 6: SEO設定
-- [ ] メタタグ設定
-- [ ] sitemap.xml生成
+### Phase 6: SEO設定 ✅
+- [x] 全ページメタタグ設定（OGP、Twitterカード、Canonical）
+- [ ] sitemap.xml生成（オプション）
 
-### Phase 7: テスト
-- [ ] 全ページ表示確認
-- [ ] ビルド成功確認
+### Phase 7: テスト ✅
+- [x] 全ページ表示確認
+- [x] ビルド成功確認（build/ディレクトリ生成）
+- [x] プリレンダー動作確認
 
-### Phase 8: デプロイ
-- [ ] GitHub リポジトリ作成
+### Phase 8: デプロイ 🚧
+- [x] GitHub リポジトリ作成
 - [ ] Cloudflare Pages 設定
 - [ ] Railway 解約
 
