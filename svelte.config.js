@@ -8,7 +8,11 @@ const config = {
       fallback: undefined,
       precompress: false,
       strict: true
-    })
+    }),
+    prerender: {
+      handleMissingId: 'warn', // 日本語IDリンクの警告を抑制
+      handleHttpError: 'warn'   // HTTPエラーを警告に変更
+    }
   }
 };
 
