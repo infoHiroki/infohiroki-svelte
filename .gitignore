@@ -9,3 +9,6 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 /tmp
 *.log
+
+# 一時的に除外（後で実装予定）
+static/favicon.ico
