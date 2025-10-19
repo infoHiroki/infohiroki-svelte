@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>初心者のためのSvelteKit完全ガイド</title>
+    <style>
+        :root {
+            --primary: #ff3e00;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --bg: #ffffff;
+            --bg-alt: #f8f9fa;
+            --text: #1a1a1a;
+            --text-muted: #666;
+            --border: #e0e0e0;
+            --code-bg: #f5f5f5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff3e00 0%, #cc3200 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        nav {
+            background: var(--bg-alt);
+            border-bottom: 2px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1rem 0;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        nav a:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin: 3rem 0 1.5rem;
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+            color: var(--text);
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .box {
+            background: var(--bg-alt);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .box-required {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(255, 62, 0, 0.05) 0%, rgba(255, 62, 0, 0.02) 100%);
+        }
+
+        .box-optional {
+            border-color: var(--info);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0.02) 100%);
+        }
+
+        .box-generated {
+            border-color: var(--warning);
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(245, 158, 11, 0.02) 100%);
+        }
+
+        .box-header {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .badge-required {
+            background: var(--primary);
+            color: white;
+        }
+
+        .badge-optional {
+            background: var(--info);
+            color: white;
+        }
+
+        .badge-generated {
+            background: var(--warning);
+            color: white;
+        }
+
+        .file-item {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.75rem 0;
+        }
+
+        .file-name {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-purpose {
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .file-detail {
+            font-size: 0.95rem;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        code {
+            background: var(--code-bg);
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            color: var(--primary);
+        }
+
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            white-space: pre;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: var(--text);
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .comparison-item {
+            background: var(--bg-alt);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .comparison-title {
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        ul {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, rgba(255, 62, 0, 0.1) 0%, rgba(255, 62, 0, 0.3) 100%);
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .tip {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border-left: 4px solid var(--success);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .tip-title {
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎓 初心者のためのSvelteKit完全ガイド</h1>
+        <p>Svelte・TypeScript・ディレクトリ構造・ビルドプロセスを徹底解説</p>
+    </div>
+
+    <nav>
+        <ul>
+            <li><a href="#intro">はじめに</a></li>
+            <li><a href="#terms">用語解説</a></li>
+            <li><a href="#directory">ディレクトリ解説</a></li>
+            <li><a href="#svelte">Svelteとは</a></li>
+            <li><a href="#typescript">TypeScriptとは</a></li>
+            <li><a href="#build">ビルドとは</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <!-- はじめに -->
+        <section id="intro" class="section">
+            <h2>🎯 はじめに</h2>
+            <p>このガイドは、<strong>SvelteやTypeScriptを初めて使う方</strong>のために作られました。専門用語を避け、できるだけ分かりやすく説明します。</p>
+
+            <div class="tip">
+                <div class="tip-title">💡 このガイドで学べること</div>
+                <ul style="margin-left: 1.5rem;">
+                    <li>SvelteKitプロジェクトのフォルダ構成</li>
+                    <li>どのファイルが必須で、どれがオプションか</li>
+                    <li>src、node_modules などの用語の意味</li>
+                    <li>Svelte と TypeScript の基本</li>
+                    <li>ビルド（build）とは何か</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 用語解説 -->
+        <section id="terms" class="section">
+            <h2>📖 よく出てくる用語解説</h2>
+
+            <div class="file-item">
+                <div class="file-name">src (ソース)</div>
+                <div class="file-purpose">「source（ソース）」の略 = 「元となるコード」</div>
+                <div class="file-detail">
+                    <p><strong>意味:</strong> あなたが書くプログラムのコード（元ファイル）が入っているフォルダです。</p>
+                    <p><strong>なぜsrcと略すのか:</strong> プログラマーは長い名前を嫌うので、「source」を「src」と短縮します。</p>
+                    <p><strong>中身:</strong> TypeScriptファイル（<code>.ts</code>）、Svelteファイル（<code>.svelte</code>）など、あなたが編集するファイルが入っています。</p>
+                </div>
+            </div>
+
+            <div class="file-item">
+                <div class="file-name">node_modules</div>
+                <div class="file-purpose">他の人が作ったプログラム（ライブラリ）の保管庫</div>
+                <div class="file-detail">
+                    <p><strong>意味:</strong> <code>npm install</code> を実行したときにダウンロードされる、他の人が作ったコードの集まりです。</p>
+                    <p><strong>なぜ必要:</strong> ゼロからすべてを作るのは大変なので、便利な機能を他の人から借りてきます。例: Markdownを変換する<code>marked</code>、SvelteKit本体など。</p>
+                    <p><strong>注意:</strong> <span class="highlight">このフォルダは自分で編集しません！</span> <code>npm install</code> が自動的に管理します。</p>
+                    <p><strong>削除してもいい？:</strong> はい。削除しても <code>npm install</code> を実行すれば再ダウンロードされます。</p>
+                </div>
+            </div>
+
+            <div class="file-item">
+                <div class="file-name">static</div>
+                <div class="file-purpose">そのまま公開するファイル（画像・CSS・JSなど）</div>
+                <div class="file-detail">
+                    <p><strong>意味:</strong> 変換せずに、そのままWebサイトに公開されるファイルを入れるフォルダです。</p>
+                    <p><strong>例:</strong> 画像（<code>.jpg</code>, <code>.png</code>）、CSS（<code>style.css</code>）、JavaScript（<code>main.js</code>）など。</p>
+                    <p><strong>ルール:</strong> <code>static/images/logo.png</code> に置いたファイルは、Webサイトで <code>/images/logo.png</code> としてアクセスできます（<code>static</code> の部分は自動的に消えます）。</p>
+                </div>
+            </div>
+
+            <div class="file-item">
+                <div class="file-name">build (ビルド)</div>
+                <div class="file-purpose">完成品のWebサイト（公開用ファイル）</div>
+                <div class="file-detail">
+                    <p><strong>意味:</strong> <code>npm run build</code> を実行すると作られる、最終的なWebサイトのファイルが入るフォルダです。</p>
+                    <p><strong>なぜ必要:</strong> <code>src/</code> の中のTypeScriptやSvelteファイルは、ブラウザで直接実行できません。HTMLやJavaScriptに変換する必要があります。その変換後のファイルがここに入ります。</p>
+                    <p><strong>注意:</strong> <span class="highlight">このフォルダは自動生成されます！</span> 自分で編集してはいけません。</p>
+                </div>
+            </div>
+
+            <div class="file-item">
+                <div class="file-name">.svelte-kit</div>
+                <div class="file-purpose">SvelteKitの作業用フォルダ（一時ファイル）</div>
+                <div class="file-detail">
+                    <p><strong>意味:</strong> SvelteKitが開発中に使う一時ファイルが入っています。</p>
+                    <p><strong>削除してもいい？:</strong> はい。開発サーバーを起動すると自動的に再作成されます。</p>
+                    <p><strong>注意:</strong> <span class="highlight">このフォルダは触りません！</span></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ディレクトリ解説 -->
+        <section id="directory" class="section">
+            <h2>📁 ディレクトリ構造 - 必須・オプション・自動生成の分類</h2>
+
+            <p>SvelteKitプロジェクトのフォルダを、<strong>必須</strong>・<strong>オプション</strong>・<strong>自動生成</strong>の3つに分類して説明します。</p>
+
+            <h3 style="color: var(--primary);">🔴 必須ファイル・フォルダ（これがないと動かない）</h3>
+
+            <div class="box box-required">
+                <div class="box-header">
+                    📂 src/ <span class="badge badge-required">必須</span>
+                </div>
+                <p><strong>役割:</strong> あなたが書くプログラムコードの本体</p>
+                <p><strong>中身:</strong></p>
+                <ul style="margin-left: 1.5rem;">
+                    <li><code>routes/</code> - ページのコード（ファイル名がURLになる）</li>
+                    <li><code>lib/</code> - 再利用するコード（コンポーネント、関数など）</li>
+                    <li><code>app.html</code> - HTMLの土台（全ページ共通）</li>
+                </ul>
+                <p><strong>削除したら:</strong> プロジェクトが動きません。</p>
+            </div>
+
+            <div class="box box-required">
+                <div class="box-header">
+                    📄 package.json <span class="badge badge-required">必須</span>
+                </div>
+                <p><strong>役割:</strong> プロジェクトの設定ファイル</p>
+                <p><strong>中身:</strong></p>
+                <ul style="margin-left: 1.5rem;">
+                    <li>プロジェクト名・バージョン</li>
+                    <li>使用するライブラリのリスト（SvelteKit、marked、gray-matterなど）</li>
+                    <li>実行コマンド（<code>npm run dev</code>、<code>npm run build</code> など）</li>
+                </ul>
+                <p><strong>例:</strong></p>
+                <pre><code>{
+  "name": "infohiroki-svelte",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "marked": "^16.4.1",
+    "gray-matter": "^4.0.3"
+  }
+}</code></pre>
+            </div>
+
+            <div class="box box-required">
+                <div class="box-header">
+                    📄 svelte.config.js <span class="badge badge-required">必須</span>
+                </div>
+                <p><strong>役割:</strong> SvelteKitの設定ファイル</p>
+                <p><strong>中身:</strong></p>
+                <ul style="margin-left: 1.5rem;">
+                    <li>どのアダプターを使うか（<code>adapter-static</code> = 静的サイト生成）</li>
+                    <li>ビルドの出力先（<code>build/</code>）</li>
+                </ul>
+                <pre><code>import adapter from '@sveltejs/adapter-static';
+
+export default {
+  kit: {
+    adapter: adapter({
+      pages: 'build',  // ビルド結果の出力先
+      assets: 'build'
+    })
+  }
+};</code></pre>
+            </div>
+
+            <h3 style="color: var(--info); margin-top: 3rem;">🔵 オプション（あると便利だが、なくても動く）</h3>
+
+            <div class="box box-optional">
+                <div class="box-header">
+                    📂 static/ <span class="badge badge-optional">オプション</span>
+                </div>
+                <p><strong>役割:</strong> 画像・CSS・JSなど、変換せずにそのまま公開するファイル</p>
+                <p><strong>削除しても:</strong> 動きます。ただし、画像やCSSがなくなります。</p>
+            </div>
+
+            <div class="box box-optional">
+                <div class="box-header">
+                    📄 README.md <span class="badge badge-optional">オプション</span>
+                </div>
+                <p><strong>役割:</strong> プロジェクトの説明書（人間が読むためのもの）</p>
+                <p><strong>削除しても:</strong> プログラムは動きます。ただし、後で見返したときに困ります。</p>
+            </div>
+
+            <div class="box box-optional">
+                <div class="box-header">
+                    📄 CLAUDE.md, DESIGN.md <span class="badge badge-optional">オプション</span>
+                </div>
+                <p><strong>役割:</strong> 設計思想やルールを書いたドキュメント（自分で作ったもの）</p>
+                <p><strong>削除しても:</strong> プログラムは動きます。開発の指針として使っています。</p>
+            </div>
+
+            <h3 style="color: var(--warning); margin-top: 3rem;">🟡 自動生成（触ってはいけない）</h3>
+
+            <div class="box box-generated">
+                <div class="box-header">
+                    📂 node_modules/ <span class="badge badge-generated">自動生成</span>
+                </div>
+                <p><strong>役割:</strong> <code>npm install</code> でダウンロードされたライブラリ</p>
+                <p><strong>絶対に編集しない:</strong> 中のファイルを変更してはいけません。</p>
+                <p><strong>削除してもいい？:</strong> はい。<code>npm install</code> で再生成できます。</p>
+                <p><strong>サイズ:</strong> 数百MB〜数GBになることも。Gitには含めません（<code>.gitignore</code> で除外）。</p>
+            </div>
+
+            <div class="box box-generated">
+                <div class="box-header">
+                    📂 build/ <span class="badge badge-generated">自動生成</span>
+                </div>
+                <p><strong>役割:</strong> <code>npm run build</code> で作られる、公開用ファイル</p>
+                <p><strong>絶対に編集しない:</strong> 編集しても、次のビルドで上書きされます。</p>
+                <p><strong>削除してもいい？:</strong> はい。<code>npm run build</code> で再生成できます。</p>
+            </div>
+
+            <div class="box box-generated">
+                <div class="box-header">
+                    📂 .svelte-kit/ <span class="badge badge-generated">自動生成</span>
+                </div>
+                <p><strong>役割:</strong> SvelteKitの開発用一時ファイル</p>
+                <p><strong>絶対に編集しない:</strong> SvelteKitが自動管理します。</p>
+                <p><strong>削除してもいい？:</strong> はい。開発サーバー起動時に再生成されます。</p>
+            </div>
+
+            <div class="box box-generated">
+                <div class="box-header">
+                    📄 package-lock.json <span class="badge badge-generated">自動生成</span>
+                </div>
+                <p><strong>役割:</strong> インストールしたライブラリの正確なバージョンを記録</p>
+                <p><strong>なぜ必要:</strong> チームで開発するとき、全員が同じバージョンのライブラリを使えるようにするため。</p>
+                <p><strong>編集する？:</strong> <span class="highlight">絶対に手動編集しません！</span> <code>npm install</code> が自動更新します。</p>
+            </div>
+        </section>
+
+        <!-- Svelteとは -->
+        <section id="svelte" class="section">
+            <h2>🔥 Svelteとは？ - 初心者向け解説</h2>
+
+            <p><strong>Svelte（スヴェルト）</strong>は、Webページを作るためのツール（フレームワーク）です。HTMLを拡張して、より便利に書けるようにしたものです。</p>
+
+            <h3>他のツール（React、Vue）との違い</h3>
+
+            <div class="comparison">
+                <div class="comparison-item">
+                    <div class="comparison-title" style="color: #61dafb;">React / Vue</div>
+                    <ul style="margin-left: 1.5rem; font-size: 0.95rem;">
+                        <li>ブラウザで動く仮想DOM（重い）</li>
+                        <li>JavaScript多め、複雑</li>
+                        <li>ファイルサイズが大きい</li>
+                    </ul>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="comparison-title" style="color: var(--primary);">Svelte</div>
+                    <ul style="margin-left: 1.5rem; font-size: 0.95rem;">
+                        <li>ビルド時に最適化（速い）</li>
+                        <li>HTMLに近い、シンプル</li>
+                        <li>ファイルサイズが小さい</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Svelteファイル（.svelte）の構造</h3>
+
+            <div class="box">
+                <p>Svelteファイルは、<strong>3つのブロック</strong>に分かれています：</p>
+                <pre><code>&lt;script lang="ts"&gt;
+  // 1️⃣ JavaScript/TypeScriptのコード
+  let count = 0;
+
+  function increment() {
+    count += 1;
+  }
+&lt;/script&gt;
+
+&lt;!-- 2️⃣ HTML --&gt;
+&lt;button on:click={increment}&gt;
+  クリック数: {count}
+&lt;/button&gt;
+
+&lt;style&gt;
+  /* 3️⃣ CSS */
+  button {
+    background: #ff3e00;
+    color: white;
+    padding: 1rem;
+  }
+&lt;/style&gt;</code></pre>
+            </div>
+
+            <div class="tip">
+                <div class="tip-title">💡 Svelteのいいところ</div>
+                <ul style="margin-left: 1.5rem;">
+                    <li><strong>HTMLに近い</strong>: 普通のHTMLを書く感覚で使える</li>
+                    <li><strong>学習曲線が緩やか</strong>: React/Vueより簡単</li>
+                    <li><strong>高速</strong>: ビルド時に最適化されるので、ブラウザで高速動作</li>
+                    <li><strong>コード量が少ない</strong>: 同じ機能をReactより少ないコードで書ける</li>
+                </ul>
+            </div>
+
+            <h3>SvelteKitとは？</h3>
+
+            <p><strong>SvelteKit</strong> = Svelteを使ったWebサイト全体を作るためのツール</p>
+
+            <ul style="margin-left: 1.5rem;">
+                <li><strong>Svelte</strong> - 部品（コンポーネント）を作るツール</li>
+                <li><strong>SvelteKit</strong> - Webサイト全体（ルーティング、ビルド、デプロイ）を管理するツール</li>
+            </ul>
+
+            <p><strong>例え:</strong></p>
+            <ul style="margin-left: 1.5rem;">
+                <li>Svelte = レゴブロック1個1個</li>
+                <li>SvelteKit = レゴブロックを組み合わせて家を作る設計図とツール</li>
+            </ul>
+        </section>
+
+        <!-- TypeScriptとは -->
+        <section id="typescript" class="section">
+            <h2>📘 TypeScriptとは？ - 初心者向け解説</h2>
+
+            <p><strong>TypeScript（タイプスクリプト）</strong>は、JavaScriptに「型」を追加した言語です。</p>
+
+            <h3>JavaScriptとの違い</h3>
+
+            <div class="comparison">
+                <div class="comparison-item">
+                    <div class="comparison-title" style="color: #f7df1e;">JavaScript</div>
+                    <pre style="font-size: 0.85rem;"><code>function add(a, b) {
+  return a + b;
+}
+
+add(1, 2);      // 3
+add("1", "2");  // "12" (文字列結合)</code></pre>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">型がないので、数字と文字列が混ざってバグの原因に</p>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="comparison-title" style="color: #3178c6;">TypeScript</div>
+                    <pre style="font-size: 0.85rem;"><code>function add(a: number, b: number): number {
+  return a + b;
+}
+
+add(1, 2);      // 3
+add("1", "2");  // エラー！</code></pre>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">型があるので、間違いを書いた瞬間にエラーで教えてくれる</p>
+                </div>
+            </div>
+
+            <div class="tip">
+                <div class="tip-title">💡 TypeScriptのメリット</div>
+                <ul style="margin-left: 1.5rem;">
+                    <li><strong>バグが減る</strong>: 間違いを書いた瞬間にエディタが教えてくれる</li>
+                    <li><strong>コードが読みやすい</strong>: 型を見れば、何を渡せばいいか一目瞭然</li>
+                    <li><strong>リファクタリングが安全</strong>: 型があるので、変更しても壊れにくい</li>
+                    <li><strong>補完が効く</strong>: エディタが自動的にコードを補完してくれる</li>
+                </ul>
+            </div>
+
+            <h3>よく使う型の例</h3>
+
+            <div class="box">
+                <pre><code>// 基本的な型
+let name: string = "Hiroki";          // 文字列
+let age: number = 30;                  // 数値
+let isActive: boolean = true;          // 真偽値
+
+// 配列
+let tags: string[] = ["AI", "Svelte", "Go"];
+
+// オブジェクト（インターフェース）
+interface BlogPost {
+  title: string;
+  date: string;
+  tags: string[];
+}
+
+let post: BlogPost = {
+  title: "SvelteKit入門",
+  date: "2025-10-19",
+  tags: ["Svelte", "TypeScript"]
+};
+
+// null許容型
+let maybePost: BlogPost | null = null;  // BlogPostかnullのどちらか</code></pre>
+            </div>
+
+            <h3>このプロジェクトでの使い方</h3>
+
+            <p>このプロジェクトでは、<code>src/lib/types/blog.ts</code> で型を定義しています：</p>
+
+            <pre><code>export interface BlogPost {
+  slug: string;           // ファイル名
+  title: string;          // 記事タイトル
+  description: string;    // 説明文
+  icon: string;           // アイコン絵文字
+  tags: string[];         // タグ配列
+  date: string;           // 日付
+  content: string;        // HTML本文
+}</code></pre>
+
+            <p>これを使うことで、<strong>BlogPostオブジェクトの形が決まっている</strong>ので、間違った形のデータを渡すとエラーになります。</p>
+        </section>
+
+        <!-- ビルドとは -->
+        <section id="build" class="section">
+            <h2>🔨 ビルドとは？ - 初心者向け解説</h2>
+
+            <p><strong>ビルド（build）</strong> = プログラムを「完成品」に変換する作業</p>
+
+            <h3>なぜビルドが必要？</h3>
+
+            <p><code>src/</code> フォルダの中のファイルは、<strong>ブラウザで直接実行できません</strong>。</p>
+
+            <div class="box">
+                <p><strong>理由:</strong></p>
+                <ul style="margin-left: 1.5rem;">
+                    <li>TypeScript（<code>.ts</code>）はブラウザが理解できない → JavaScriptに変換が必要</li>
+                    <li>Svelte（<code>.svelte</code>）もブラウザが理解できない → HTML+JS+CSSに分解が必要</li>
+                    <li>ファイルが分散している → 1つにまとめて最適化する必要がある</li>
+                </ul>
+            </div>
+
+            <h3>ビルドプロセス（何が起こっているか）</h3>
+
+            <div style="background: var(--bg-alt); border: 2px solid var(--border); border-radius: 12px; padding: 2rem; margin: 2rem 0;">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <div style="background: white; border: 2px solid var(--primary); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                        <strong>1️⃣ あなたが書いたコード</strong><br>
+                        <code>src/routes/+page.svelte</code><br>
+                        <code>src/lib/utils/posts.ts</code>
+                    </div>
+                    <div style="font-size: 2rem; color: var(--primary);">↓</div>
+                    <div style="background: white; border: 2px solid var(--warning); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                        <strong>2️⃣ Viteがビルド</strong><br>
+                        TypeScript → JavaScript<br>
+                        Svelte → HTML+JS+CSS
+                    </div>
+                    <div style="font-size: 2rem; color: var(--warning);">↓</div>
+                    <div style="background: white; border: 2px solid var(--info); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                        <strong>3️⃣ SvelteKitが静的サイト生成</strong><br>
+                        全ページをHTMLファイルに出力
+                    </div>
+                    <div style="font-size: 2rem; color: var(--info);">↓</div>
+                    <div style="background: white; border: 2px solid var(--success); border-radius: 8px; padding: 1rem;">
+                        <strong>4️⃣ 完成品</strong><br>
+                        <code>build/index.html</code><br>
+                        <code>build/blog/index.html</code><br>
+                        （102記事分のHTMLファイル）
+                    </div>
+                </div>
+            </div>
+
+            <h3>ビルドコマンド</h3>
+
+            <div class="box">
+                <p><strong>開発中（プレビュー）:</strong></p>
+                <pre><code>npm run dev</code></pre>
+                <ul style="margin-left: 1.5rem;">
+                    <li>開発サーバーが起動（<code>http://localhost:5173</code>）</li>
+                    <li>ファイルを編集すると、即座にブラウザに反映（HMR）</li>
+                    <li>まだビルドしていない（<code>build/</code> フォルダは作られない）</li>
+                </ul>
+
+                <p style="margin-top: 1.5rem;"><strong>本番ビルド:</strong></p>
+                <pre><code>npm run build</code></pre>
+                <ul style="margin-left: 1.5rem;">
+                    <li>完成品を作る（<code>build/</code> フォルダに出力）</li>
+                    <li>最適化される（ファイルサイズ削減、高速化）</li>
+                    <li>この<code>build/</code> フォルダをCloudflare Pagesにアップロードする</li>
+                </ul>
+
+                <p style="margin-top: 1.5rem;"><strong>ビルド結果のプレビュー:</strong></p>
+                <pre><code>npm run preview</code></pre>
+                <ul style="margin-left: 1.5rem;">
+                    <li>ビルド後のファイルをローカルで確認</li>
+                    <li>本番環境と同じ動作を確認できる</li>
+                </ul>
+            </div>
+
+            <h3>ビルドで何が最適化されるか</h3>
+
+            <div class="box">
+                <ul style="margin-left: 1.5rem;">
+                    <li><strong>ファイルサイズ削減</strong>: 不要な空白・コメントを削除（minify）</li>
+                    <li><strong>複数ファイルを結合</strong>: HTTPリクエスト数を減らす</li>
+                    <li><strong>コード分割</strong>: 必要なコードだけを読み込む（遅延ロード）</li>
+                    <li><strong>型情報の削除</strong>: TypeScriptの型は実行時に不要なので削除</li>
+                    <li><strong>古いブラウザ対応</strong>: 最新のJavaScript構文を古い書き方に変換</li>
+                </ul>
+            </div>
+
+            <div class="tip">
+                <div class="tip-title">💡 ビルドのポイント</div>
+                <ul style="margin-left: 1.5rem;">
+                    <li><strong>開発中は <code>npm run dev</code></strong>: 高速・リアルタイム更新</li>
+                    <li><strong>公開前に <code>npm run build</code></strong>: 最適化された完成品を作る</li>
+                    <li><strong><code>build/</code> フォルダは編集禁止</strong>: 次のビルドで上書きされる</li>
+                    <li><strong>エラーが出たら <code>npm run check</code></strong>: TypeScriptの型エラーを確認</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- まとめ -->
+        <section class="section">
+            <h2>📚 まとめ</h2>
+
+            <div class="box" style="background: linear-gradient(135deg, rgba(255, 62, 0, 0.1) 0%, rgba(255, 62, 0, 0.05) 100%);">
+                <h3>このガイドで学んだこと</h3>
+                <ul style="margin-left: 1.5rem;">
+                    <li>✅ <code>src/</code> = あなたが書くコード（必須）</li>
+                    <li>✅ <code>node_modules/</code> = ダウンロードしたライブラリ（自動生成・編集禁止）</li>
+                    <li>✅ <code>static/</code> = 画像・CSSなど、そのまま公開するファイル（オプション）</li>
+                    <li>✅ <code>build/</code> = ビルド後の完成品（自動生成・編集禁止）</li>
+                    <li>✅ Svelte = HTMLに近い、シンプルなフレームワーク</li>
+                    <li>✅ TypeScript = 型があるJavaScript（バグを減らす）</li>
+                    <li>✅ ビルド = TypeScript/Svelteを変換して完成品を作る作業</li>
+                </ul>
+            </div>
+
+            <div class="tip">
+                <div class="tip-title">💡 次のステップ</div>
+                <ul style="margin-left: 1.5rem;">
+                    <li>実際に <code>src/routes/+page.svelte</code> を編集してみる</li>
+                    <li><code>npm run dev</code> で開発サーバーを起動して、変更を確認</li>
+                    <li>新しいページを作ってみる（<code>src/routes/test/+page.svelte</code>）</li>
+                    <li><code>npm run build</code> でビルドして、<code>build/</code> フォルダを確認</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

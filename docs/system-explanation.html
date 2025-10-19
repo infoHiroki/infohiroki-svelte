@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>infoHiroki SvelteKit システム解説 - 完全技術ドキュメント</title>
+    <style>
+        :root {
+            --primary: #ff3e00;
+            --primary-dark: #cc3200;
+            --secondary: #676778;
+            --bg: #ffffff;
+            --bg-alt: #f8f9fa;
+            --text: #1a1a1a;
+            --text-muted: #666;
+            --border: #e0e0e0;
+            --code-bg: #f5f5f5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #1a1a1a;
+                --bg-alt: #2a2a2a;
+                --text: #e0e0e0;
+                --text-muted: #a0a0a0;
+                --border: #404040;
+                --code-bg: #2d2d2d;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background: var(--bg);
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        nav {
+            background: var(--bg-alt);
+            border-bottom: 2px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1rem 0;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        nav a:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        section {
+            margin-bottom: 4rem;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+            color: var(--secondary);
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--text);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .card {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        code {
+            background: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            color: var(--primary);
+        }
+
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            line-height: 1.5;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: var(--text);
+        }
+
+        .architecture-diagram {
+            background: var(--bg-alt);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .diagram-box {
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem auto;
+            max-width: 300px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .diagram-arrow {
+            font-size: 2rem;
+            color: var(--primary);
+            margin: 0.5rem 0;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 1rem;
+            text-align: left;
+            border: 1px solid var(--border);
+        }
+
+        .comparison-table th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: var(--bg-alt);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .badge-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .badge-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .badge-error {
+            background: var(--error);
+            color: white;
+        }
+
+        .badge-info {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .file-tree {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'Consolas', 'Monaco', monospace;
+            line-height: 1.8;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        .file-tree .dir {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .file-tree .file {
+            color: var(--text);
+        }
+
+        .file-tree .comment {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, transparent 0%, var(--primary) 0%) 0 0 / 0 100% no-repeat;
+            transition: background-size 0.3s;
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
+        }
+
+        .highlight:hover {
+            background-size: 100% 100%;
+            color: white;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab:hover {
+            color: var(--primary);
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+            margin: 2rem 0;
+        }
+
+        .flow-step {
+            background: var(--bg-alt);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem 2rem;
+            min-width: 300px;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+
+        .principle-box {
+            border-left: 4px solid var(--primary);
+            background: var(--bg-alt);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .principle-title {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .principle-desc {
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .example {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .example-header {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--success);
+        }
+
+        .example-header.bad {
+            color: var(--error);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .comparison-table {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media print {
+            nav, .header {
+                display: none;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            pre, .file-tree {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📘 infoHiroki SvelteKit システム解説</h1>
+        <p>Go + Gin からSvelteKit + TypeScriptへの完全移行プロジェクト - 技術アーキテクチャとデータフローの詳細解説</p>
+    </div>
+
+    <nav>
+        <ul>
+            <li><a href="#overview">概要</a></li>
+            <li><a href="#architecture">アーキテクチャ</a></li>
+            <li><a href="#directory">ディレクトリ構造</a></li>
+            <li><a href="#dataflow">データフロー</a></li>
+            <li><a href="#principles">設計思想</a></li>
+            <li><a href="#components">コンポーネント</a></li>
+            <li><a href="#comparison">Go版との比較</a></li>
+            <li><a href="#troubleshooting">トラブルシューティング</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <!-- 概要セクション -->
+        <section id="overview">
+            <h2>🎯 プロジェクト概要</h2>
+
+            <div class="card">
+                <div class="card-header">プロジェクト名</div>
+                <p>infoHiroki Website SvelteKit版</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">目的と背景</div>
+                <ul>
+                    <li><strong>コスト削減</strong>: Railway $5-10/月 → Cloudflare Pages $0/月（完全無料化）</li>
+                    <li><strong>技術習得</strong>: TypeScript/SvelteKitでフリーランス案件対応力向上</li>
+                    <li><strong>保守性向上</strong>: Go版のswitch文メタデータ → Markdownフロントマター</li>
+                    <li><strong>パフォーマンス</strong>: サーバーサイドレンダリング → 静的サイト生成（SSG）</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-header">技術スタック</div>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>カテゴリ</th>
+                            <th>技術</th>
+                            <th>バージョン</th>
+                            <th>理由</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>フレームワーク</td>
+                            <td>SvelteKit</td>
+                            <td>2.47.1</td>
+                            <td>HTMLライク、学習曲線が緩やか、SSG対応</td>
+                        </tr>
+                        <tr>
+                            <td>言語</td>
+                            <td>TypeScript</td>
+                            <td>5.x</td>
+                            <td>型安全性、大規模開発対応、キャリア開発</td>
+                        </tr>
+                        <tr>
+                            <td>SSG</td>
+                            <td>@sveltejs/adapter-static</td>
+                            <td>3.0.10</td>
+                            <td>静的サイト生成、無料ホスティング対応</td>
+                        </tr>
+                        <tr>
+                            <td>Markdown処理</td>
+                            <td>marked</td>
+                            <td>16.4.1</td>
+                            <td>高速、GitHub互換、軽量</td>
+                        </tr>
+                        <tr>
+                            <td>Frontmatter</td>
+                            <td>gray-matter</td>
+                            <td>4.0.3</td>
+                            <td>YAML frontmatter標準ライブラリ</td>
+                        </tr>
+                        <tr>
+                            <td>ビルドツール</td>
+                            <td>Vite</td>
+                            <td>7.1.10</td>
+                            <td>高速ビルド、HMR、開発体験向上</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">プロジェクト規模</div>
+                <ul>
+                    <li><span class="badge badge-success">102記事</span> Markdownファイル（Go版から7記事追加）</li>
+                    <li><span class="badge badge-info">10ページ</span> 全ルート（Home, Blog, Services, Products, Results, About, FAQ, Contact, Error, [slug]）</li>
+                    <li><span class="badge badge-warning">1,958行</span> CSS（Go版から完全移植）</li>
+                    <li><span class="badge badge-info">49個</span> 画像ファイル</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- アーキテクチャセクション -->
+        <section id="architecture">
+            <h2>🏗️ システムアーキテクチャ</h2>
+
+            <h3>全体構成</h3>
+            <div class="architecture-diagram">
+                <div class="diagram-box">ユーザー（ブラウザ）</div>
+                <div class="diagram-arrow">↓</div>
+                <div class="diagram-box">Cloudflare Pages CDN</div>
+                <div class="diagram-arrow">↓</div>
+                <div class="diagram-box">静的HTML/CSS/JS</div>
+                <div class="diagram-arrow">↓</div>
+                <div class="diagram-box">ビルド時生成（SvelteKit SSG）</div>
+                <div class="diagram-arrow">↓</div>
+                <div class="diagram-box">Markdown記事（102ファイル）</div>
+            </div>
+
+            <h3>SvelteKitレイヤー構造</h3>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                <strong>初心者向け解説:</strong> SvelteKitは、データの流れを4つの層に分けて管理します。上から下へ、データが流れていくイメージです。
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 2rem; margin: 2rem 0;">
+                <div style="background: linear-gradient(135deg, rgba(255, 62, 0, 0.1) 0%, rgba(255, 62, 0, 0.05) 100%); border: 2px solid var(--primary); border-radius: 12px; padding: 1.5rem;">
+                    <h4 style="color: var(--primary); margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.5rem;">🎨</span>
+                        レイヤー1: Presentation Layer (UI層)
+                    </h4>
+                    <p style="color: var(--text-muted); margin-bottom: 1rem;"><strong>役割:</strong> ユーザーに見える画面を表示</p>
+                    <ul style="margin-left: 1.5rem; color: var(--text);">
+                        <li><code>+page.svelte</code> - 各ページのコンポーネント</li>
+                        <li><code>Header.svelte</code>, <code>Footer.svelte</code> - 共通UI部品</li>
+                        <li><code>+layout.svelte</code> - 全ページ共通のレイアウト</li>
+                    </ul>
+                </div>
+
+                <div style="text-align: center; font-size: 2rem; color: var(--primary);">↓ データが渡される</div>
+
+                <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%); border: 2px solid var(--success); border-radius: 12px; padding: 1.5rem;">
+                    <h4 style="color: var(--success); margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.5rem;">⚙️</span>
+                        レイヤー2: Data Loading Layer (データ読み込み層)
+                    </h4>
+                    <p style="color: var(--text-muted); margin-bottom: 1rem;"><strong>役割:</strong> サーバー側でデータを取得して、UIに渡す</p>
+                    <ul style="margin-left: 1.5rem; color: var(--text);">
+                        <li><code>+page.server.ts</code> - サーバーサイドでのみ実行される</li>
+                        <li><code>load()</code> 関数 - データ取得のエントリーポイント</li>
+                        <li>Node.jsのAPIが使える（<code>fs</code>, <code>path</code>など）</li>
+                    </ul>
+                </div>
+
+                <div style="text-align: center; font-size: 2rem; color: var(--success);">↓ データアクセス関数を呼ぶ</div>
+
+                <div style="background: linear-gradient(135deg, rgba(103, 119, 120, 0.1) 0%, rgba(103, 119, 120, 0.05) 100%); border: 2px solid var(--secondary); border-radius: 12px; padding: 1.5rem;">
+                    <h4 style="color: var(--secondary); margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.5rem;">🔧</span>
+                        レイヤー3: Data Access Layer (データアクセス層)
+                    </h4>
+                    <p style="color: var(--text-muted); margin-bottom: 1rem;"><strong>役割:</strong> ファイルやデータベースからデータを読み込む</p>
+                    <ul style="margin-left: 1.5rem; color: var(--text);">
+                        <li><code>src/lib/utils/posts.ts</code> - データ取得ユーティリティ</li>
+                        <li><code>getAllPosts()</code> - 全記事取得</li>
+                        <li><code>getPostBySlug()</code> - 個別記事取得</li>
+                        <li><code>fs.readFileSync()</code> でファイルを読む</li>
+                    </ul>
+                </div>
+
+                <div style="text-align: center; font-size: 2rem; color: var(--secondary);">↓ ファイルを読み込む</div>
+
+                <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%); border: 2px solid var(--warning); border-radius: 12px; padding: 1.5rem;">
+                    <h4 style="color: var(--warning); margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.5rem;">📄</span>
+                        レイヤー4: Data Source (データソース)
+                    </h4>
+                    <p style="color: var(--text-muted); margin-bottom: 1rem;"><strong>役割:</strong> 実際のデータが保存されている場所</p>
+                    <ul style="margin-left: 1.5rem; color: var(--text);">
+                        <li><code>src/lib/content/blog/*.md</code> - 102記事のMarkdownファイル</li>
+                        <li>各ファイルにfrontmatter（メタデータ）と本文が含まれる</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="background: var(--bg-alt); border-left: 4px solid var(--primary); padding: 1.5rem; margin: 2rem 0; border-radius: 0 8px 8px 0;">
+                <h4 style="margin-top: 0; color: var(--primary);">💡 初心者向けポイント</h4>
+                <p style="color: var(--text-muted); margin-bottom: 1rem;">このレイヤー構造のおかげで:</p>
+                <ul style="margin-left: 1.5rem; color: var(--text);">
+                    <li>✅ <strong>責任分離</strong>: 各レイヤーは自分の役割だけに集中できる</li>
+                    <li>✅ <strong>保守しやすい</strong>: 変更が必要な時、どこを修正すればいいか明確</li>
+                    <li>✅ <strong>テストしやすい</strong>: 各レイヤーを独立してテストできる</li>
+                    <li>✅ <strong>再利用可能</strong>: データアクセス層は複数のページで再利用</li>
+                </ul>
+            </div>
+
+            <h3>ビルドプロセス</h3>
+            <div class="flowchart">
+                <div class="flow-step">1. ソースコード (src/)</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">2. Viteビルド (TypeScript → JavaScript)</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">3. SvelteKit SSG (全ページ静的生成)</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">4. adapter-static (build/ディレクトリ出力)</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">5. Cloudflare Pagesデプロイ</div>
+            </div>
+        </section>
+
+        <!-- ディレクトリ構造セクション -->
+        <section id="directory">
+            <h2>📁 ディレクトリ構造</h2>
+
+            <div class="file-tree">
+<span class="dir">infohiroki-svelte/</span>
+├── <span class="dir">src/</span>
+│   ├── <span class="dir">lib/</span>
+│   │   ├── <span class="dir">components/</span>           <span class="comment"># 共通UIコンポーネント</span>
+│   │   │   ├── <span class="file">Header.svelte</span>    <span class="comment"># グローバルヘッダー（ナビゲーション）</span>
+│   │   │   └── <span class="file">Footer.svelte</span>    <span class="comment"># グローバルフッター</span>
+│   │   ├── <span class="dir">content/</span>
+│   │   │   └── <span class="dir">blog/</span>             <span class="comment"># 102記事のMarkdownファイル</span>
+│   │   │       ├── <span class="file">2024-03-27-notion-save-to-notion-extension.md</span>
+│   │   │       ├── <span class="file">2024-03-29-chatgpt-reskilling-guide.md</span>
+│   │   │       └── <span class="file">...</span> (102ファイル)
+│   │   ├── <span class="dir">types/</span>
+│   │   │   └── <span class="file">blog.ts</span>          <span class="comment"># BlogPost型定義</span>
+│   │   └── <span class="dir">utils/</span>
+│   │       └── <span class="file">posts.ts</span>         <span class="comment"># 記事取得ユーティリティ（サーバーサイド）</span>
+│   ├── <span class="dir">routes/</span>                   <span class="comment"># ファイルベースルーティング</span>
+│   │   ├── <span class="file">+layout.svelte</span>       <span class="comment"># グローバルレイアウト</span>
+│   │   ├── <span class="file">+error.svelte</span>        <span class="comment"># 404/エラーページ</span>
+│   │   ├── <span class="file">+page.svelte</span>         <span class="comment"># ホームページ (/)</span>
+│   │   ├── <span class="dir">blog/</span>
+│   │   │   ├── <span class="file">+page.server.ts</span>  <span class="comment"># ブログ一覧データ取得</span>
+│   │   │   ├── <span class="file">+page.svelte</span>     <span class="comment"># ブログ一覧UI（3カラムグリッド）</span>
+│   │   │   └── <span class="dir">[slug]/</span>           <span class="comment"># 動的ルート（個別記事）</span>
+│   │   │       ├── <span class="file">+page.server.ts</span>
+│   │   │       └── <span class="file">+page.svelte</span>
+│   │   ├── <span class="dir">services/</span>
+│   │   │   └── <span class="file">+page.svelte</span>
+│   │   ├── <span class="dir">products/</span>
+│   │   ├── <span class="dir">results/</span>
+│   │   ├── <span class="dir">about/</span>
+│   │   ├── <span class="dir">faq/</span>
+│   │   └── <span class="dir">contact/</span>
+│   └── <span class="file">app.html</span>                 <span class="comment"># HTMLテンプレート</span>
+├── <span class="dir">static/</span>                       <span class="comment"># 静的アセット（Go版から完全移植）</span>
+│   ├── <span class="dir">css/</span>
+│   │   └── <span class="file">style.css</span>            <span class="comment"># 1,958行のグローバルCSS</span>
+│   ├── <span class="dir">js/</span>
+│   │   └── <span class="file">main.js</span>              <span class="comment"># グローバルJavaScript</span>
+│   └── <span class="dir">images/</span>                   <span class="comment"># 49個の画像ファイル</span>
+├── <span class="file">svelte.config.js</span>             <span class="comment"># SvelteKit設定（static adapter）</span>
+├── <span class="file">vite.config.ts</span>               <span class="comment"># Viteビルド設定</span>
+├── <span class="file">tsconfig.json</span>                <span class="comment"># TypeScript設定（strict mode）</span>
+├── <span class="file">package.json</span>                 <span class="comment"># npm依存関係</span>
+├── <span class="file">CLAUDE.md</span>                    <span class="comment"># 設計思想・開発ガイド</span>
+├── <span class="file">DESIGN.md</span>                    <span class="comment"># 設計書・実装チェックリスト</span>
+└── <span class="file">README.md</span>                    <span class="comment"># プロジェクト概要</span>
+            </div>
+
+            <h3>主要ファイルの役割</h3>
+
+            <div class="card">
+                <h4>1. <code>src/lib/types/blog.ts</code> - 型定義</h4>
+                <pre><code>export interface BlogPost {
+  slug: string;           // ファイル名（拡張子なし）
+  title: string;          // 記事タイトル
+  description: string;    // 記事説明文（SEO用）
+  icon: string;           // アイコン絵文字（🤖📝等）
+  tags: string[];         // タグ配列
+  date: string;           // 公開日（YYYY-MM-DD）
+  content: string;        // レンダリング済みHTML
+}</code></pre>
+            </div>
+
+            <div class="card">
+                <h4>2. <code>src/lib/utils/posts.ts</code> - データアクセス層</h4>
+                <pre><code>import fs from 'fs';
+import path from 'path';
+import matter from 'gray-matter';
+import { marked } from 'marked';
+
+const postsDirectory = path.join(process.cwd(), 'src/lib/content/blog');
+
+// 全記事を取得（日付降順）
+export function getAllPosts(): BlogPost[] {
+  const fileNames = fs.readdirSync(postsDirectory);
+
+  const posts = fileNames
+    .filter(fileName => fileName.endsWith('.md'))
+    .map(fileName => {
+      const slug = fileName.replace(/\.md$/, '');
+      const fullPath = path.join(postsDirectory, fileName);
+      const fileContents = fs.readFileSync(fullPath, 'utf8');
+      const { data, content } = matter(fileContents);
+
+      return {
+        slug: data.slug || slug,
+        title: data.title || 'タイトル未設定',
+        description: data.description || '',
+        icon: data.icon || '📝',
+        tags: data.tags || [],
+        date: data.date || new Date().toISOString().split('T')[0],
+        content: marked(content)
+      } as BlogPost;
+    })
+    .sort((a, b) => (a.date > b.date ? -1 : 1));
+
+  return posts;
+}
+
+// 個別記事を取得
+export function getPostBySlug(slug: string): BlogPost | null {
+  try {
+    const fullPath = path.join(postsDirectory, `${slug}.md`);
+    const fileContents = fs.readFileSync(fullPath, 'utf8');
+    const { data, content } = matter(fileContents);
+
+    return {
+      slug: data.slug || slug,
+      title: data.title || 'タイトル未設定',
+      description: data.description || '',
+      icon: data.icon || '📝',
+      tags: data.tags || [],
+      date: data.date || new Date().toISOString().split('T')[0],
+      content: marked(content)
+    } as BlogPost;
+  } catch (error) {
+    console.error(`記事が見つかりません: ${slug}`, error);
+    return null;
+  }
+}</code></pre>
+            </div>
+
+            <div class="card">
+                <h4>3. <code>src/routes/blog/+page.server.ts</code> - データローディング</h4>
+                <pre><code>import { getAllPosts } from '$lib/utils/posts';
+import type { PageServerLoad } from './$types';
+
+export const load: PageServerLoad = () => {
+  const posts = getAllPosts();
+  return { posts };
+};</code></pre>
+                <p><strong>重要ポイント:</strong> <code>+page.server.ts</code> はサーバーサイドでのみ実行されるため、Node.jsモジュール（fs, path）を安全に使用可能</p>
+            </div>
+        </section>
+
+        <!-- データフローセクション -->
+        <section id="dataflow">
+            <h2>🔄 データフロー</h2>
+
+            <h3>ブログ一覧ページのデータフロー</h3>
+            <div class="flowchart">
+                <div class="flow-step">1. ユーザーが /blog にアクセス</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">2. SvelteKitが +page.server.ts の load() を実行</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">3. getAllPosts() が呼ばれる</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">4. fs.readFileSync() で102記事を読み込み</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">5. gray-matter でfrontmatter解析</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">6. marked でMarkdown → HTML変換</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">7. 日付降順でソート</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">8. +page.svelte に { posts } を渡す</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">9. 3カラムグリッドでレンダリング</div>
+            </div>
+
+            <h3>個別記事ページのデータフロー</h3>
+            <div class="flowchart">
+                <div class="flow-step">1. ユーザーが /blog/[slug] にアクセス</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">2. +page.server.ts の load({ params }) が実行</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">3. getPostBySlug(params.slug) が呼ばれる</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">4. 該当のMarkdownファイルを読み込み</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">5. frontmatter解析 + Markdown変換</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">6. 記事が見つからない場合 → throw error(404)</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">7. +page.svelte に { post } を渡す</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-step">8. 記事HTMLをレンダリング</div>
+            </div>
+
+            <h3>静的サイト生成（SSG）のデータフロー</h3>
+            <div class="card">
+                <p><strong>ビルド時（npm run build）:</strong></p>
+                <ol>
+                    <li>SvelteKitが全ルートをクロール</li>
+                    <li>各ページの <code>load()</code> 関数を実行</li>
+                    <li>動的ルート <code>[slug]</code> は102記事分すべて生成</li>
+                    <li>HTMLファイルとして <code>build/</code> ディレクトリに出力</li>
+                    <li>CSS/JS/画像もバンドル・最適化して出力</li>
+                </ol>
+
+                <p><strong>結果:</strong></p>
+                <ul>
+                    <li>✅ <code>build/index.html</code> (ホームページ)</li>
+                    <li>✅ <code>build/blog/index.html</code> (ブログ一覧)</li>
+                    <li>✅ <code>build/blog/2024-03-29-chatgpt-reskilling-guide/index.html</code> (個別記事 x 102)</li>
+                    <li>✅ その他全ページの静的HTML</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 設計思想セクション -->
+        <section id="principles">
+            <h2>💡 設計思想</h2>
+
+            <div class="principle-box">
+                <div class="principle-title">1. KISS (Keep It Simple, Stupid)</div>
+                <div class="principle-desc">シンプルさを最優先する設計</div>
+
+                <div class="example">
+                    <div class="example-header">✅ Good: シンプルで明確</div>
+                    <pre><code>export function getAllPosts(): BlogPost[] {
+  const fileNames = fs.readdirSync(postsDirectory);
+  return fileNames
+    .filter(fileName => fileName.endsWith('.md'))
+    .map(parseMarkdownFile)
+    .sort((a, b) => (a.date > b.date ? -1 : 1));
+}</code></pre>
+                </div>
+
+                <div class="example">
+                    <div class="example-header bad">❌ Bad: 過度な抽象化</div>
+                    <pre><code>class PostRepository implements IRepository&lt;BlogPost&gt; {
+  constructor(private strategy: ILoadStrategy) {}
+  async findAll(query: QueryBuilder): Promise&lt;BlogPost[]&gt; {
+    // 不要な複雑性...
+  }
+}</code></pre>
+                </div>
+
+                <ul>
+                    <li>✅ 複雑なデータベース不要: ファイルベース、ビルド時処理で十分</li>
+                    <li>✅ 必要最小限の機能: 現在必要な機能のみ実装</li>
+                    <li>✅ 理解しやすいコード: コメント不要なほど明確</li>
+                    <li>❌ 過度な抽象化禁止: 将来の拡張性のための抽象化は避ける</li>
+                </ul>
+            </div>
+
+            <div class="principle-box">
+                <div class="principle-title">2. YAGNI (You Aren't Gonna Need It)</div>
+                <div class="principle-desc">今必要でない機能は実装しない</div>
+
+                <div class="example">
+                    <div class="example-header">✅ Good: 今必要な機能のみ</div>
+                    <pre><code>export function getPostBySlug(slug: string): BlogPost | null {
+  const fullPath = path.join(postsDirectory, `${slug}.md`);
+  // シンプルに1記事取得
+}</code></pre>
+                </div>
+
+                <div class="example">
+                    <div class="example-header bad">❌ Bad: 不要な汎用化</div>
+                    <pre><code>export function getPostsByQuery(query: QueryBuilder): BlogPost[] {
+  // 今は使わない複雑な検索機能...
+}
+
+export function getPostsByTag(tag: string): BlogPost[] {
+  // 将来のための機能（今は不要）
+}</code></pre>
+                </div>
+
+                <ul>
+                    <li>✅ 現在の要件のみ実装: タグフィルタリング、検索機能は後回し</li>
+                    <li>✅ 機能追加は後から: 必要になってから実装（リファクタリング前提）</li>
+                    <li>❌ "将来のため"禁止: 102記事で十分なら拡張不要</li>
+                </ul>
+            </div>
+
+            <div class="principle-box">
+                <div class="principle-title">3. DRY (Don't Repeat Yourself)</div>
+                <div class="principle-desc">重複を避け、再利用可能にする</div>
+
+                <div class="example">
+                    <div class="example-header">✅ Good: 共通処理を関数化</div>
+                    <pre><code>function parseMarkdownFile(fileName: string): BlogPost {
+  const slug = fileName.replace(/\.md$/, '');
+  const fullPath = path.join(postsDirectory, fileName);
+  const fileContents = fs.readFileSync(fullPath, 'utf8');
+  const { data, content } = matter(fileContents);
+  return { /* BlogPost */ };
+}
+
+// getAllPosts() と getPostBySlug() で再利用</code></pre>
+                </div>
+
+                <ul>
+                    <li>✅ コンポーネントの再利用: Header/Footerを全ページで共有</li>
+                    <li>✅ 型定義の一元管理: BlogPost型を1箇所で定義</li>
+                    <li>✅ CSSの再利用: 既存1,958行CSSを活用</li>
+                    <li>❌ コピペ禁止: 同じコードを2箇所に書かない</li>
+                </ul>
+            </div>
+
+            <div class="principle-box">
+                <div class="principle-title">4. Golang哲学の踏襲</div>
+                <div class="principle-desc">Go言語の設計思想をTypeScript/SvelteKitに適用</div>
+
+                <h4>4.1. 明示的であること（Explicit over Implicit）</h4>
+                <div class="example">
+                    <div class="example-header">✅ Good: 明示的な型とエラーハンドリング</div>
+                    <pre><code>export function getPostBySlug(slug: string): BlogPost | null {
+  try {
+    const fullPath = path.join(postsDirectory, `${slug}.md`);
+    const fileContents = fs.readFileSync(fullPath, 'utf8');
+    return parsePost(fileContents);
+  } catch (error) {
+    console.error(`記事が見つかりません: ${slug}`, error);
+    return null; // 明示的にnullを返す
+  }
+}</code></pre>
+                </div>
+
+                <ul>
+                    <li>✅ 型は明示的: <code>any</code> 型禁止</li>
+                    <li>✅ エラーハンドリング明示: try-catchで明示的処理</li>
+                    <li>✅ null安全: <code>| null</code> で明示的にnull許容</li>
+                </ul>
+
+                <h4>4.2. 小さなインターフェース（Small Interfaces）</h4>
+                <pre><code>// ✅ 必要最小限のAPI
+export function getAllPosts(): BlogPost[] { /* */ }
+export function getPostBySlug(slug: string): BlogPost | null { /* */ }
+export function getPostCount(): number { /* */ }</code></pre>
+
+                <h4>4.3. 組み込みの優先（Use Built-in）</h4>
+                <ul>
+                    <li>✅ 標準ライブラリ優先: Node.js標準の <code>fs</code>, <code>path</code></li>
+                    <li>✅ 軽量ライブラリ: <code>marked</code>, <code>gray-matter</code> のみ</li>
+                    <li>❌ 過度な依存禁止: 不要なnpmパッケージは追加しない</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- コンポーネント詳解セクション -->
+        <section id="components">
+            <h2>🧩 コンポーネント詳解</h2>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab(event, 'header')">Header</button>
+                <button class="tab" onclick="switchTab(event, 'footer')">Footer</button>
+                <button class="tab" onclick="switchTab(event, 'layout')">Layout</button>
+                <button class="tab" onclick="switchTab(event, 'blog-list')">Blog List</button>
+                <button class="tab" onclick="switchTab(event, 'blog-detail')">Blog Detail</button>
+            </div>
+
+            <div id="header" class="tab-content active">
+                <h3>Header.svelte - グローバルヘッダー</h3>
+                <p><strong>役割:</strong> サイト全体のナビゲーション、モバイルメニュー対応</p>
+                <p><strong>機能:</strong></p>
+                <ul>
+                    <li>デスクトップ: 横並びナビゲーション</li>
+                    <li>モバイル: ハンバーガーメニュー</li>
+                    <li>アクティブページのハイライト（$page.url.pathname）</li>
+                </ul>
+                <pre><code>&lt;script lang="ts"&gt;
+  import { page } from '$app/stores';
+
+  let mobileMenuOpen = false;
+
+  $: currentPath = $page.url.pathname;
+&lt;/script&gt;
+
+&lt;header class="site-header"&gt;
+  &lt;nav&gt;
+    &lt;a href="/" class:active={currentPath === '/'}&gt;ホーム&lt;/a&gt;
+    &lt;a href="/blog" class:active={currentPath.startsWith('/blog')}&gt;ブログ&lt;/a&gt;
+    &lt;a href="/services" class:active={currentPath === '/services'}&gt;サービス&lt;/a&gt;
+    &lt;!-- その他のナビゲーション --&gt;
+  &lt;/nav&gt;
+&lt;/header&gt;</code></pre>
+            </div>
+
+            <div id="footer" class="tab-content">
+                <h3>Footer.svelte - グローバルフッター</h3>
+                <p><strong>役割:</strong> サイト全体のフッター、コピーライト表示</p>
+                <pre><code>&lt;footer class="site-footer"&gt;
+  &lt;div class="container"&gt;
+    &lt;p&gt;&copy; 2025 infoHiroki. All rights reserved.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/footer&gt;</code></pre>
+            </div>
+
+            <div id="layout" class="tab-content">
+                <h3>+layout.svelte - グローバルレイアウト</h3>
+                <p><strong>役割:</strong> 全ページ共通のレイアウト構造</p>
+                <pre><code>&lt;script lang="ts"&gt;
+  import Header from '$lib/components/Header.svelte';
+  import Footer from '$lib/components/Footer.svelte';
+&lt;/script&gt;
+
+&lt;svelte:head&gt;
+  &lt;link rel="stylesheet" href="/css/style.css"&gt;
+  &lt;script src="/js/main.js"&gt;&lt;/script&gt;
+&lt;/svelte:head&gt;
+
+&lt;div class="site-layout"&gt;
+  &lt;Header /&gt;
+  &lt;div class="main-wrapper"&gt;
+    &lt;main class="site-main"&gt;
+      &lt;slot /&gt; &lt;!-- 各ページのコンテンツがここに挿入される --&gt;
+    &lt;/main&gt;
+    &lt;Footer /&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+
+            <div id="blog-list" class="tab-content">
+                <h3>blog/+page.svelte - ブログ一覧ページ</h3>
+                <p><strong>役割:</strong> 102記事を3カラムグリッドで表示</p>
+                <p><strong>データ:</strong> +page.server.ts から { posts } を受け取る</p>
+                <pre><code>&lt;script lang="ts"&gt;
+  import type { PageData } from './$types';
+
+  export let data: PageData;
+  const { posts } = data;
+&lt;/script&gt;
+
+&lt;main class="container"&gt;
+  &lt;section class="blog-list"&gt;
+    {#each posts as post}
+      &lt;article class="blog-card"&gt;
+        &lt;a href="/blog/{post.slug}"&gt;
+          &lt;span class="article-icon"&gt;{post.icon}&lt;/span&gt;
+          &lt;h2&gt;{post.title}&lt;/h2&gt;
+          &lt;p&gt;{post.description}&lt;/p&gt;
+          &lt;div class="tags"&gt;
+            {#each post.tags as tag}
+              &lt;span class="tag"&gt;{tag}&lt;/span&gt;
+            {/each}
+          &lt;/div&gt;
+        &lt;/a&gt;
+      &lt;/article&gt;
+    {/each}
+  &lt;/section&gt;
+&lt;/main&gt;
+
+&lt;style&gt;
+  .blog-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 1024px) {
+    .blog-list { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 640px) {
+    .blog-list { grid-template-columns: 1fr; }
+  }
+&lt;/style&gt;</code></pre>
+            </div>
+
+            <div id="blog-detail" class="tab-content">
+                <h3>blog/[slug]/+page.svelte - 個別記事ページ</h3>
+                <p><strong>役割:</strong> Markdown記事のHTML表示</p>
+                <pre><code>&lt;script lang="ts"&gt;
+  import type { PageData } from './$types';
+
+  export let data: PageData;
+  const { post } = data;
+&lt;/script&gt;
+
+&lt;svelte:head&gt;
+  &lt;title&gt;{post.title} | infoHiroki&lt;/title&gt;
+  &lt;meta name="description" content={post.description} /&gt;
+&lt;/svelte:head&gt;
+
+&lt;article class="blog-post"&gt;
+  &lt;header&gt;
+    &lt;h1&gt;{post.icon} {post.title}&lt;/h1&gt;
+    &lt;time&gt;{post.date}&lt;/time&gt;
+  &lt;/header&gt;
+
+  &lt;div class="content"&gt;
+    {@html post.content}
+  &lt;/div&gt;
+&lt;/article&gt;</code></pre>
+            </div>
+        </section>
+
+        <!-- Go版との比較セクション -->
+        <section id="comparison">
+            <h2>⚖️ Go版との比較</h2>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>項目</th>
+                        <th>Go版</th>
+                        <th>SvelteKit版</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>サーバー</td>
+                        <td>Railway（$5-10/月）</td>
+                        <td><span class="badge badge-success">Cloudflare Pages（無料）</span></td>
+                    </tr>
+                    <tr>
+                        <td>レンダリング</td>
+                        <td>サーバーサイド（Gin）</td>
+                        <td><span class="badge badge-success">ビルド時静的生成（SSG）</span></td>
+                    </tr>
+                    <tr>
+                        <td>メタデータ管理</td>
+                        <td>main.go内のswitch文（300行）</td>
+                        <td><span class="badge badge-success">Markdownフロントマター（分散管理）</span></td>
+                    </tr>
+                    <tr>
+                        <td>データ取得</td>
+                        <td>メモリキャッシュ（起動時読み込み）</td>
+                        <td><span class="badge badge-info">ビルド時読み込み（実行時不要）</span></td>
+                    </tr>
+                    <tr>
+                        <td>テンプレート</td>
+                        <td>Go標準template（html/template）</td>
+                        <td><span class="badge badge-success">Svelte（コンポーネント）</span></td>
+                    </tr>
+                    <tr>
+                        <td>型システム</td>
+                        <td>Go（静的型付け）</td>
+                        <td><span class="badge badge-success">TypeScript（strict mode）</span></td>
+                    </tr>
+                    <tr>
+                        <td>記事数</td>
+                        <td>95記事</td>
+                        <td><span class="badge badge-success">102記事（+7記事）</span></td>
+                    </tr>
+                    <tr>
+                        <td>パフォーマンス</td>
+                        <td>サーバーリクエスト必要</td>
+                        <td><span class="badge badge-success">CDN配信、超高速</span></td>
+                    </tr>
+                    <tr>
+                        <td>開発体験</td>
+                        <td>Go + Gin（サーバー再起動必要）</td>
+                        <td><span class="badge badge-success">Vite HMR（即座に反映）</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>メタデータ管理の比較</h3>
+
+            <div class="card">
+                <h4>Go版: main.go内のswitch文（300行）</h4>
+                <pre><code>func getArticleMetadata(slug string) ArticleMetadata {
+    switch slug {
+    case "2024-03-29-chatgpt-reskilling-guide":
+        return ArticleMetadata{
+            Title: "ChatGPTリスキリングガイド",
+            Description: "ChatGPTを活用した...",
+            Icon: "🤖",
+            Tags: []string{"ChatGPT", "AI"},
+            Date: "2024-03-29",
+        }
+    case "2024-03-27-notion-save-to-notion-extension":
+        return ArticleMetadata{
+            Title: "Notion Save to Notion拡張機能",
+            // ...
+        }
+    // ... 95記事分のcase文が続く
+    default:
+        return ArticleMetadata{}
+    }
+}</code></pre>
+                <p class="badge badge-error">問題点:</p>
+                <ul>
+                    <li>❌ 300行のswitch文（保守性低い）</li>
+                    <li>❌ 記事追加のたびにコード修正必要</li>
+                    <li>❌ メタデータと本文が分離（整合性リスク）</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h4>SvelteKit版: Markdownフロントマター</h4>
+                <pre><code>---
+slug: "2024-03-29-chatgpt-reskilling-guide"
+title: "ChatGPTリスキリングガイド"
+description: "ChatGPTを活用した..."
+icon: "🤖"
+tags: ["ChatGPT", "AI"]
+date: "2024-03-29"
+---
+
+# ChatGPTリスキリングガイド
+
+記事本文...</code></pre>
+                <p class="badge badge-success">改善点:</p>
+                <ul>
+                    <li>✅ メタデータと本文が1ファイルで管理</li>
+                    <li>✅ 記事追加時はファイル追加のみ（コード修正不要）</li>
+                    <li>✅ 整合性が保たれる（frontmatterと本文が同一ファイル）</li>
+                    <li>✅ 保守性向上（各記事が自己完結）</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- トラブルシューティングセクション -->
+        <section id="troubleshooting">
+            <h2>🔧 トラブルシューティング</h2>
+
+            <div class="card">
+                <h3>1. ブラウザ互換性エラー: "Module 'path' has been externalized"</h3>
+
+                <h4>エラー内容</h4>
+                <pre><code>[vite] Internal server error: Module "path" has been externalized for browser compatibility.
+Cannot access "path.join" in client code.</code></pre>
+
+                <h4>原因</h4>
+                <p>Node.jsモジュール（<code>fs</code>, <code>path</code>）をブラウザ環境で実行しようとした</p>
+                <p><code>+page.ts</code> はサーバーとブラウザ両方で実行されるため、Node.jsモジュールを使用するとエラー</p>
+
+                <h4>解決策</h4>
+                <p class="badge badge-success">+page.ts → +page.server.ts にリネーム</p>
+                <pre><code>// ❌ src/routes/blog/+page.ts (ブラウザでも実行される)
+import type { PageLoad } from './$types';
+import { getAllPosts } from '$lib/utils/posts';
+
+export const load: PageLoad = async () => {
+  const posts = getAllPosts(); // エラー!
+  return { posts };
+};
+
+// ✅ src/routes/blog/+page.server.ts (サーバーのみで実行)
+import type { PageServerLoad } from './$types';
+import { getAllPosts } from '$lib/utils/posts';
+
+export const load: PageServerLoad = () => {
+  const posts = getAllPosts(); // OK!
+  return { posts };
+};</code></pre>
+
+                <h4>重要ポイント</h4>
+                <ul>
+                    <li><code>+page.ts</code>: サーバー + ブラウザ両方で実行</li>
+                    <li><code>+page.server.ts</code>: サーバーのみで実行（Node.js API使用可）</li>
+                    <li>型も変更: <code>PageLoad</code> → <code>PageServerLoad</code></li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>2. ブログカードのグリッド幅が不均等</h3>
+
+                <h4>問題</h4>
+                <p>3カラムグリッドで1カラム目だけ幅が広くなる</p>
+
+                <h4>原因</h4>
+                <p>長いタイトルや英数字がカード幅を押し広げる</p>
+
+                <h4>解決策</h4>
+                <pre><code>// ❌ 問題のあるコード
+.blog-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+// ✅ 修正後
+.blog-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)); // minmax(0, 1fr)で最小幅を0に
+}
+
+.blog-card {
+  min-width: 0;        // グリッドアイテムの最小幅を0に
+  overflow: hidden;    // はみ出しを隠す
+}
+
+h2 {
+  word-wrap: break-word;      // 長い単語を折り返す
+  overflow-wrap: break-word;
+}</code></pre>
+            </div>
+
+            <div class="card">
+                <h3>3. ビルドエラー: "Type error: ..."</h3>
+
+                <h4>対処法</h4>
+                <pre><code># TypeScriptの型チェック
+npm run check
+
+# 厳格な型チェックを一時的に無効化（非推奨）
+// tsconfig.json
+{
+  "compilerOptions": {
+    "strict": false  // 推奨しない
+  }
+}
+
+# 正しい対処: 型を明示的に定義
+export let data: PageData;  // any型を避ける</code></pre>
+            </div>
+
+            <div class="card">
+                <h3>4. デプロイエラー: "Build failed"</h3>
+
+                <h4>チェックリスト</h4>
+                <ul>
+                    <li>✅ <code>npm run build</code> がローカルで成功するか</li>
+                    <li>✅ <code>svelte.config.js</code> で adapter-static が設定されているか</li>
+                    <li>✅ <code>package.json</code> の build スクリプトが正しいか</li>
+                    <li>✅ Node.jsバージョンが一致しているか（開発環境とデプロイ環境）</li>
+                </ul>
+
+                <pre><code># ローカルでビルドテスト
+npm run build
+
+# ビルド結果をプレビュー
+npm run preview</code></pre>
+            </div>
+        </section>
+
+        <!-- まとめセクション -->
+        <section>
+            <h2>📚 まとめ</h2>
+
+            <div class="card">
+                <h3>このプロジェクトの特徴</h3>
+                <ul>
+                    <li>✅ <strong>コスト削減</strong>: Railway $10/月 → Cloudflare Pages $0/月</li>
+                    <li>✅ <strong>パフォーマンス向上</strong>: サーバーサイドレンダリング → 静的サイト生成</li>
+                    <li>✅ <strong>保守性向上</strong>: switch文メタデータ → frontmatter分散管理</li>
+                    <li>✅ <strong>技術習得</strong>: TypeScript/SvelteKitでキャリア開発</li>
+                    <li>✅ <strong>設計思想</strong>: KISS/YAGNI/DRY/Golang哲学の実践</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>学んだ重要ポイント</h3>
+                <ol>
+                    <li><code>+page.server.ts</code> でNode.jsモジュールを安全に使用</li>
+                    <li>frontmatterでメタデータを記事と一元管理</li>
+                    <li>CSS Grid の <code>minmax(0, 1fr)</code> で均等幅を保証</li>
+                    <li>TypeScript strict mode で型安全性を確保</li>
+                    <li>静的サイト生成で無料ホスティング実現</li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <h3>次のステップ</h3>
+                <ul>
+                    <li>🚀 Cloudflare Pagesにデプロイ</li>
+                    <li>📊 Google Analyticsでアクセス解析</li>
+                    <li>🔍 検索機能の追加（必要に応じて）</li>
+                    <li>🌙 ダークモード対応（必要に応じて）</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function switchTab(event, tabName) {
+            // すべてのタブを非アクティブに
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // クリックされたタブをアクティブに
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // スムーズスクロール
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

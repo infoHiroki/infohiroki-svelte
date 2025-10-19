@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>移行の物語 - Go版からSvelteKitへの旅</title>
+    <style>
+        :root {
+            --primary: #ff3e00;
+            --primary-dark: #cc3200;
+            --secondary: #676778;
+            --bg: #ffffff;
+            --bg-alt: #f8f9fa;
+            --text: #1a1a1a;
+            --text-muted: #666;
+            --border: #e0e0e0;
+            --code-bg: #f5f5f5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --go-blue: #00add8;
+            --svelte-orange: #ff3e00;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #1a1a1a;
+                --bg-alt: #2a2a2a;
+                --text: #e0e0e0;
+                --text-muted: #a0a0a0;
+                --border: #404040;
+                --code-bg: #2d2d2d;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', sans-serif;
+            line-height: 1.9;
+            color: var(--text);
+            background: var(--bg);
+            padding: 0;
+        }
+
+        .book-header {
+            background: linear-gradient(135deg, var(--go-blue) 0%, var(--svelte-orange) 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .book-header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .book-header .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.95;
+            font-style: italic;
+        }
+
+        .book-header .author {
+            margin-top: 2rem;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .chapter {
+            margin-bottom: 5rem;
+            page-break-inside: avoid;
+        }
+
+        .chapter-number {
+            color: var(--primary);
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+        }
+
+        .chapter-title {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: var(--text);
+            border-left: 6px solid var(--primary);
+            padding-left: 1.5rem;
+        }
+
+        .narrative {
+            font-size: 1.1rem;
+            line-height: 2;
+            margin-bottom: 1.5rem;
+            text-indent: 1em;
+        }
+
+        .dialogue {
+            background: var(--bg-alt);
+            border-left: 4px solid var(--secondary);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+        }
+
+        .dialogue .speaker {
+            font-weight: 700;
+            color: var(--primary);
+            font-style: normal;
+            margin-bottom: 0.5rem;
+        }
+
+        .thought {
+            background: linear-gradient(120deg, transparent 0%, var(--bg-alt) 10%, var(--bg-alt) 90%, transparent 100%);
+            padding: 1rem 2rem;
+            margin: 2rem 0;
+            font-style: italic;
+            color: var(--text-muted);
+            border-top: 1px dashed var(--border);
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            line-height: 1.6;
+        }
+
+        .code-block .code-title {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .code-block code {
+            color: var(--text);
+        }
+
+        .revelation {
+            background: linear-gradient(135deg, rgba(255, 62, 0, 0.1) 0%, rgba(255, 62, 0, 0.05) 100%);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .revelation .title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .revelation .title::before {
+            content: "💡";
+            font-size: 1.5rem;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 3rem;
+            margin: 2rem 0;
+        }
+
+        .timeline::before {
+            content: "";
+            position: absolute;
+            left: 1rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--primary);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: "";
+            position: absolute;
+            left: -2.5rem;
+            top: 0.5rem;
+            width: 1rem;
+            height: 1rem;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 3px solid var(--bg);
+        }
+
+        .timeline-date {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .comparison-item {
+            background: var(--bg-alt);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .comparison-item.go {
+            border-color: var(--go-blue);
+        }
+
+        .comparison-item.svelte {
+            border-color: var(--svelte-orange);
+        }
+
+        .comparison-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .comparison-item.go .comparison-title {
+            color: var(--go-blue);
+        }
+
+        .comparison-item.svelte .comparison-title {
+            color: var(--svelte-orange);
+        }
+
+        .decision {
+            background: var(--bg-alt);
+            border-left: 4px solid var(--warning);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .decision .title {
+            font-weight: 700;
+            color: var(--warning);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .success-moment {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 2px solid var(--success);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .success-moment .emoji {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .success-moment .text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .error-block {
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid #ef4444;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #ef4444;
+        }
+
+        .section-break {
+            text-align: center;
+            margin: 3rem 0;
+            color: var(--text-muted);
+            font-size: 2rem;
+        }
+
+        .epilogue {
+            background: var(--bg-alt);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 3rem;
+            margin: 3rem 0;
+            text-align: center;
+        }
+
+        .epilogue h2 {
+            color: var(--primary);
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .book-header h1 {
+                font-size: 2rem;
+            }
+
+            .chapter-title {
+                font-size: 1.8rem;
+            }
+
+            .comparison {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .container {
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media print {
+            .book-header {
+                background: white;
+                color: black;
+            }
+
+            .chapter {
+                page-break-after: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="book-header">
+        <h1>📖 移行の物語</h1>
+        <p class="subtitle">Go + Gin から SvelteKit + TypeScript への旅</p>
+        <p class="author">技術小説 - エンジニアHiroki氏の挑戦</p>
+    </div>
+
+    <div class="container">
+        <!-- プロローグ -->
+        <div class="chapter">
+            <div class="chapter-number">Prologue</div>
+            <h2 class="chapter-title">プロローグ - 決断の日</h2>
+
+            <p class="narrative">
+                2025年10月18日、エンジニアのHiroki氏は自身のポートフォリオサイト「infoHiroki」の前で考え込んでいた。
+            </p>
+
+            <p class="narrative">
+                サイトは順調に運営されている。Go言語とGinフレームワークで構築され、Railwayでホスティングされている。102記事ものブログ記事があり、訪問者も増えてきた。しかし、ある問題が彼を悩ませていた。
+            </p>
+
+            <div class="thought">
+                「月10ドル...年間120ドル。決して高くはない。でも、このサイトは完全に静的なコンテンツだ。サーバーサイドレンダリングが本当に必要なのか？」
+            </div>
+
+            <p class="narrative">
+                Hiroki氏はターミナルを開き、サーバーのログを眺めた。すべてのリクエストでMarkdownファイルを読み込み、HTMLに変換し、レスポンスを返している。確かに高速だが、本当に毎回サーバー処理が必要なのだろうか。
+            </p>
+
+            <div class="revelation">
+                <div class="title">ひらめき</div>
+                <p>「そうだ...静的サイト生成（SSG）にすれば、サーバーは不要だ。Cloudflare Pagesなら完全無料でホスティングできる。それに、TypeScriptとSvelteKitを習得すれば、フリーランス案件の幅も広がる」</p>
+            </div>
+
+            <p class="narrative">
+                決断した。Go版からSvelteKit版への完全移行を行う。これは技術的な挑戦であり、同時にキャリアアップの機会でもある。
+            </p>
+
+            <div class="dialogue">
+                <div class="speaker">Hiroki氏（独り言）</div>
+                <p>「よし、やろう。ピクセルパーフェクトで移行する。デザインは1pxたりとも変えない。KISS、YAGNI、DRYの原則を守り、Golangの哲学も引き継ぐ。これは単なる移行ではない。より良いアーキテクチャへの進化だ」</p>
+            </div>
+        </div>
+
+        <div class="section-break">* * *</div>
+
+        <!-- 第1章 -->
+        <div class="chapter">
+            <div class="chapter-number">Chapter 1</div>
+            <h2 class="chapter-title">第1章 - 現状分析と課題の発見</h2>
+
+            <p class="narrative">
+                まず、現在のGo版の構成を詳細に分析する必要があった。Hiroki氏はノートを広げ、システムの全体像を書き出し始めた。
+            </p>
+
+            <div class="comparison">
+                <div class="comparison-item go">
+                    <div class="comparison-title">🐹 Go版の構成</div>
+                    <ul style="margin-left: 1.5rem;">
+                        <li>サーバー: Railway ($5-10/月)</li>
+                        <li>フレームワーク: Gin</li>
+                        <li>レンダリング: SSR（サーバーサイド）</li>
+                        <li>記事数: 95記事（Markdown）</li>
+                        <li>メタデータ: main.go内のswitch文</li>
+                        <li>CSS: 1,958行</li>
+                        <li>画像: 49個</li>
+                    </ul>
+                </div>
+
+                <div class="comparison-item svelte">
+                    <div class="comparison-title">🔥 目標（SvelteKit版）</div>
+                    <ul style="margin-left: 1.5rem;">
+                        <li>サーバー: Cloudflare Pages（無料）</li>
+                        <li>フレームワーク: SvelteKit</li>
+                        <li>レンダリング: SSG（静的生成）</li>
+                        <li>記事数: 102記事（+7記事）</li>
+                        <li>メタデータ: frontmatter（分散管理）</li>
+                        <li>CSS: 1,958行（完全移植）</li>
+                        <li>画像: 49個（完全移植）</li>
+                    </ul>
+                </div>
+            </div>
+
+            <p class="narrative">
+                特に問題だったのは、メタデータの管理方法だった。Go版では、main.goファイルに300行以上のswitch文があり、すべての記事のメタデータ（タイトル、説明、タグ、日付）を手動で管理していた。
+            </p>
+
+            <div class="code-block">
+                <div class="code-title">Go版 - main.go（問題のあるコード）</div>
+                <code><pre>func getArticleMetadata(slug string) ArticleMetadata {
+    switch slug {
+    case "2024-03-29-chatgpt-reskilling-guide":
+        return ArticleMetadata{
+            Title: "ChatGPTリスキリングガイド",
+            Description: "ChatGPTを活用したリスキリングの完全ガイド",
+            Icon: "🤖",
+            Tags: []string{"ChatGPT", "AI", "リスキリング"},
+            Date: "2024-03-29",
+        }
+    case "2024-03-27-notion-save-to-notion-extension":
+        return ArticleMetadata{
+            Title: "Notion Save to Notion拡張機能",
+            Description: "Notionに簡単に保存できるChrome拡張",
+            Icon: "📝",
+            Tags: []string{"Notion", "Chrome拡張"},
+            Date: "2024-03-27",
+        }
+    // ... 残り93記事分のcase文が続く ...
+    default:
+        return ArticleMetadata{}
+    }
+}</pre></code>
+            </div>
+
+            <div class="thought">
+                「これは保守性が低すぎる...新しい記事を追加するたびにこのswitch文を編集しなければならない。メタデータと実際のMarkdownファイルが分離しているから、整合性の問題も起きやすい」
+            </div>
+
+            <div class="revelation">
+                <div class="title">解決策の発見</div>
+                <p>SvelteKitでは、Markdownのfrontmatterを使えば、メタデータと本文を同一ファイルで管理できる。gray-matterライブラリを使えば、YAMLフロントマターを簡単に解析できる。</p>
+            </div>
+
+            <div class="code-block">
+                <div class="code-title">SvelteKit版 - Markdownフロントマター（理想形）</div>
+                <code><pre>---
+slug: "2024-03-29-chatgpt-reskilling-guide"
+title: "ChatGPTリスキリングガイド"
+description: "ChatGPTを活用したリスキリングの完全ガイド"
+icon: "🤖"
+tags: ["ChatGPT", "AI", "リスキリング"]
+date: "2024-03-29"
+---
+
+# ChatGPTリスキリングガイド
+
+記事本文がここに続く...</pre></code>
+            </div>
+
+            <p class="narrative">
+                これなら、記事ファイル自体がメタデータを持つ。新しい記事を追加するときは、ファイルを作成するだけでいい。コードの修正は不要だ。
+            </p>
+        </div>
+
+        <div class="section-break">* * *</div>
+
+        <!-- 第2章 -->
+        <div class="chapter">
+            <div class="chapter-number">Chapter 2</div>
+            <h2 class="chapter-title">第2章 - 技術選定の旅</h2>
+
+            <p class="narrative">
+                次の課題は、なぜSvelteKitなのか、という根本的な問いに答えることだった。ReactやNext.js、Vue.jsやNuxt.jsなど、選択肢は数多くある。
+            </p>
+
+            <div class="decision">
+                <div class="title">⚖️ 技術選定の基準</div>
+                <ol style="margin-left: 1.5rem;">
+                    <li><strong>学習曲線</strong>: できるだけHTMLライクで、直感的</li>
+                    <li><strong>静的サイト生成</strong>: SSG対応が必須</li>
+                    <li><strong>TypeScript対応</strong>: 型安全性が必要</li>
+                    <li><strong>キャリア価値</strong>: フリーランス案件で需要がある</li>
+                    <li><strong>パフォーマンス</strong>: 高速であること</li>
+                </ol>
+            </div>
+
+            <p class="narrative">
+                Hiroki氏は、各フレームワークのドキュメントを読み、サンプルコードを比較した。そして、Svelteの構文を見た瞬間、直感した。
+            </p>
+
+            <div class="comparison">
+                <div class="comparison-item" style="border-color: #61dafb;">
+                    <div class="comparison-title" style="color: #61dafb;">⚛️ React（Next.js）</div>
+                    <div class="code-block" style="margin-top: 1rem;">
+                        <code><pre>export default function BlogList({ posts }) {
+  return (
+    &lt;div className="blog-list"&gt;
+      {posts.map(post =&gt; (
+        &lt;div key={post.slug} className="blog-card"&gt;
+          &lt;h2&gt;{post.title}&lt;/h2&gt;
+        &lt;/div&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}</pre></code>
+                    </div>
+                </div>
+
+                <div class="comparison-item svelte">
+                    <div class="comparison-title">🔥 Svelte（SvelteKit）</div>
+                    <div class="code-block" style="margin-top: 1rem;">
+                        <code><pre>&lt;div class="blog-list"&gt;
+  {#each posts as post}
+    &lt;div class="blog-card"&gt;
+      &lt;h2&gt;{post.title}&lt;/h2&gt;
+    &lt;/div&gt;
+  {/each}
+&lt;/div&gt;</pre></code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="thought">
+                「Svelteの方が圧倒的にHTMLに近い...{#each}構文は、まるでテンプレートエンジンのようだ。Go言語のhtml/templateからの移行も、精神的な負担が少ない」
+            </div>
+
+            <div class="revelation">
+                <div class="title">決定的な理由</div>
+                <ul style="margin-left: 1.5rem;">
+                    <li>✅ <strong>学習曲線が緩やか</strong>: HTML/CSS/JSの知識があればすぐ書ける</li>
+                    <li>✅ <strong>ボイラープレートが少ない</strong>: useState、useEffectなどのフック不要</li>
+                    <li>✅ <strong>パフォーマンス</strong>: コンパイル時に最適化、仮想DOMなし</li>
+                    <li>✅ <strong>SvelteKit</strong>: 公式のフルスタックフレームワーク、SSG完全対応</li>
+                </ul>
+            </div>
+
+            <p class="narrative">
+                そして、TypeScript対応も完璧だった。SvelteKitは最初からTypeScriptを想定して設計されており、型安全なルーティングも自動生成される。
+            </p>
+
+            <div class="dialogue">
+                <div class="speaker">Hiroki氏</div>
+                <p>「決めた。SvelteKit + TypeScriptで行く。Goの設計哲学を引き継ぎながら、新しい技術を習得する。これは正しい選択だ」</p>
+            </div>
+        </div>
+
+        <div class="section-break">* * *</div>
+
+        <!-- 第3章 -->
+        <div class="chapter">
+            <div class="chapter-number">Chapter 3</div>
+            <h2 class="chapter-title">第3章 - 設計思想の確立</h2>
+
+            <p class="narrative">
+                技術は決まった。しかし、Hiroki氏はコードを書き始める前に、設計思想を明確にしたかった。Go言語で学んだシンプルさ、明示性、実用主義を、SvelteKitプロジェクトにも引き継ぎたい。
+            </p>
+
+            <p class="narrative">
+                彼はCLAUDE.mdファイルを開き、設計原則を書き始めた。
+            </p>
+
+            <div class="revelation">
+                <div class="title">設計原則 - KISS・YAGNI・DRY</div>
+            </div>
+
+            <h3 style="margin-top: 2rem; color: var(--primary);">1. KISS (Keep It Simple, Stupid)</h3>
+
+            <p class="narrative">
+                「シンプルであることは、美しい」。これはGoの哲学でもある。
+            </p>
+
+            <div class="code-block">
+                <div class="code-title">✅ Good: シンプルで明確な実装</div>
+                <code><pre>export function getAllPosts(): BlogPost[] {
+  const fileNames = fs.readdirSync(postsDirectory);
+  return fileNames
+    .filter(fileName => fileName.endsWith('.md'))
+    .map(parseMarkdownFile)
+    .sort((a, b) => (a.date > b.date ? -1 : 1));
+}</pre></code>
+            </div>
+
+            <div class="code-block">
+                <div class="code-title">❌ Bad: 過度な抽象化（今は不要）</div>
+                <code><pre>class PostRepository implements IRepository&lt;BlogPost&gt; {
+  constructor(
+    private loadStrategy: ILoadStrategy,
+    private cacheManager: ICacheManager,
+    private logger: ILogger
+  ) {}
+
+  async findAll(
+    query: QueryBuilder&lt;BlogPost&gt;
+  ): Promise&lt;Result&lt;BlogPost[], Error&gt;&gt; {
+    // 100行の複雑なロジック...
+  }
+}</pre></code>
+            </div>
+
+            <div class="thought">
+                「データベースもない、認証もない、ただのブログだ。クラス、インターフェース、依存性注入...そんな複雑さは不要。関数3つで十分だ」
+            </div>
+
+            <h3 style="margin-top: 2rem; color: var(--primary);">2. YAGNI (You Aren't Gonna Need It)</h3>
+
+            <p class="narrative">
+                「将来のための機能」は、実装しない。今必要なものだけを作る。
+            </p>
+
+            <div class="decision">
+                <div class="title">🚫 今は実装しない機能</div>
+                <ul style="margin-left: 1.5rem;">
+                    <li>タグフィルタリング機能（記事数102件、フィルター不要）</li>
+                    <li>全文検索機能（Ctrl+Fで十分）</li>
+                    <li>コメント機能（問い合わせフォームがある）</li>
+                    <li>ダークモード（CSS変数で将来追加可能だが、今は不要）</li>
+                    <li>多言語対応（日本語のみで十分）</li>
+                </ul>
+            </div>
+
+            <div class="dialogue">
+                <div class="speaker">Hiroki氏の心の声</div>
+                <p>「検索機能を作りたい衝動はある...でも待て。今、誰かが検索機能を求めているのか？いや、求めていない。必要になったら、その時に実装すればいい。今は、102記事を確実に表示することに集中しよう」</p>
+            </div>
+
+            <h3 style="margin-top: 2rem; color: var(--primary);">3. DRY (Don't Repeat Yourself)</h3>
+
+            <p class="narrative">
+                重複は悪だ。しかし、過度な抽象化も悪だ。バランスが大切だ。
+            </p>
+
+            <div class="code-block">
+                <div class="code-title">✅ Good: 適切な共通化</div>
+                <code><pre>// Markdown解析ロジックを1箇所に集約
+function parseMarkdownFile(fileName: string): BlogPost {
+  const slug = fileName.replace(/\.md$/, '');
+  const fullPath = path.join(postsDirectory, fileName);
+  const fileContents = fs.readFileSync(fullPath, 'utf8');
+  const { data, content } = matter(fileContents);
+
+  return {
+    slug: data.slug || slug,
+    title: data.title || 'タイトル未設定',
+    description: data.description || '',
+    icon: data.icon || '📝',
+    tags: data.tags || [],
+    date: data.date || new Date().toISOString().split('T')[0],
+    content: marked(content)
+  } as BlogPost;
+}
+
+// getAllPosts() と getPostBySlug() で再利用</pre></code>
+            </div>
+
+            <h3 style="margin-top: 2rem; color: var(--primary);">4. Golang哲学の継承</h3>
+
+            <p class="narrative">
+                Hiroki氏が最も大切にしているのは、Go言語で学んだ実用主義だった。
+            </p>
+
+            <div class="revelation">
+                <div class="title">Golangから学んだこと</div>
+                <ul style="margin-left: 1.5rem;">
+                    <li><strong>明示的であること</strong>: 型は明示、エラーハンドリングは明示</li>
+                    <li><strong>小さなインターフェース</strong>: APIは必要最小限に</li>
+                    <li><strong>組み込みの優先</strong>: 標準ライブラリを活用、依存を最小化</li>
+                    <li><strong>実用主義</strong>: 理論より実践、動くコードを書く</li>
+                </ul>
+            </div>
+
+            <div class="code-block">
+                <div class="code-title">明示的な型とエラーハンドリング</div>
+                <code><pre>export function getPostBySlug(slug: string): BlogPost | null {
+  try {
+    const fullPath = path.join(postsDirectory, `${slug}.md`);
+    const fileContents = fs.readFileSync(fullPath, 'utf8');
+    return parsePost(fileContents);
+  } catch (error) {
+    console.error(`記事が見つかりません: ${slug}`, error);
+    return null; // 明示的にnullを返す
+  }
+}</pre></code>
+            </div>
+
+            <p class="narrative">
+                設計思想が固まった。これで、ブレることなくコードを書き進められる。
+            </p>
+        </div>
+
+        <div class="section-break">* * *</div>
+
+        <!-- 第4章 -->
+        <div class="chapter">
+            <div class="chapter-number">Chapter 4</div>
+            <h2 class="chapter-title">第4章 - 実装の格闘</h2>
+
+            <p class="narrative">
+                2025年10月18日深夜、Hiroki氏はついにコードを書き始めた。
+            </p>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">23:00 - プロジェクト初期化</div>
+                    <div class="code-block">
+                        <code><pre>npm create svelte@latest infohiroki-svelte
+cd infohiroki-svelte
+npm install
+npm install -D @sveltejs/adapter-static
+npm install gray-matter marked</pre></code>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-date">23:30 - 型定義作成</div>
+                    <p>BlogPost型を定義。Go版のArticleMetadata構造体をTypeScriptに移植。</p>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-date">00:00 - posts.ts実装開始</div>
+                    <p>getAllPosts()関数を実装。fs.readFileSync()でMarkdownを読み込み、gray-matterで解析。</p>
+                </div>
+            </div>
+
+            <p class="narrative">
+                順調だった...最初は。しかし、ブログ一覧ページを実装しようとしたとき、問題が発生した。
+            </p>
+
+            <div class="error-block">
+[vite] Internal server error: Module "path" has been externalized for browser compatibility.
+Cannot access "path.join" in client code.
+    at src/routes/blog/+page.ts:3:25
+            </div>
+
+            <div class="thought">
+                「えっ...何？ブラウザ互換性のために'path'モジュールが外部化された？つまり、ブラウザでNode.jsのpathモジュールを使おうとした？」
+            </div>
+
+            <p class="narrative">
+                Hiroki氏はエラーメッセージを何度も読み返した。そして、気づいた。
+            </p>
+
+            <div class="revelation">
+                <div class="title">問題の本質</div>
+                <p><code>+page.ts</code> はサーバーとブラウザの<strong>両方</strong>で実行される。しかし、<code>fs</code>や<code>path</code>などのNode.jsモジュールは、ブラウザでは使えない。</p>
+                <p>解決策: <code>+page.ts</code> を <code>+page.server.ts</code> にリネームすれば、サーバーでのみ実行される！</p>
+            </div>
+
+            <div class="code-block">
+                <div class="code-title">修正前: src/routes/blog/+page.ts</div>
+                <code><pre>import type { PageLoad } from './$types';
+import { getAllPosts } from '$lib/utils/posts';
+
+export const load: PageLoad = async () => {
+  const posts = getAllPosts(); // エラー！
+  return { posts };
+};</pre></code>
+            </div>
+
+            <div class="code-block">
+                <div class="code-title">修正後: src/routes/blog/+page.server.ts</div>
+                <code><pre>import type { PageServerLoad } from './$types';
+import { getAllPosts } from '$lib/utils/posts';
+
+export const load: PageServerLoad = () => {
+  const posts = getAllPosts(); // OK！
+  return { posts };
+};</pre></code>
+            </div>
+
+            <p class="narrative">
+                ファイル名を変更し、型を<code>PageLoad</code>から<code>PageServerLoad</code>に変更。開発サーバーを再起動。
+            </p>
+
+            <div class="success-moment">
+                <div class="emoji">🎉</div>
+                <div class="text">ブログ一覧ページが表示された！</div>
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">01:00 - レイアウトコンポーネント実装</div>
+                    <p>Header.svelte、Footer.svelte、+layout.svelteを実装。Go版のテンプレートから構造を移植。</p>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-date">02:00 - ホームページ移植</div>
+                    <p>index.htmlの内容を+page.svelteに移植。SEOメタタグも完全移植。</p>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-date">03:00 - 全固定ページ実装完了</div>
+                    <p>services, products, results, about, faq, contactページをすべて実装。</p>
+                </div>
+            </div>
+
+            <p class="narrative">
+                しかし、ブログ一覧ページを確認したとき、また問題が発生した。
+            </p>
+
+            <div class="thought">
+                「1カラム目だけ明らかに広い...グリッドレイアウトが崩れている」
+            </div>
+
+            <p class="narrative">
+                3カラムグリッドのはずが、1列目だけ幅が広くなっている。Chromeのデベロッパーツールで調査した結果、原因が判明した。
+            </p>
+
+            <div class="revelation">
+                <div class="title">CSSグリッドの罠</div>
+                <p><code>grid-template-columns: repeat(3, 1fr)</code> は、各カラムを均等に分割する...はずだった。しかし、グリッドアイテムの<strong>コンテンツ</strong>が最小幅に影響を与えていた。</p>
+                <p>長いタイトルや英数字が折り返されず、カードの幅を押し広げていたのだ。</p>
+            </div>
+
+            <div class="code-block">
+                <div class="code-title">修正: minmax(0, 1fr)で最小幅を0に設定</div>
+                <code><pre>.blog-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* ←ここ！ */
+  gap: 1.5rem;
+}
+
+.blog-card {
+  min-width: 0;        /* グリッドアイテムの最小幅を0に */
+  overflow: hidden;    /* はみ出しを隠す */
+}
+
+h2 {
+  word-wrap: break-word;      /* 長い単語を折り返す */
+  overflow-wrap: break-word;
+}</pre></code>
+            </div>
+
+            <div class="success-moment">
+                <div class="emoji">✨</div>
+                <div class="text">3カラムが完璧に均等になった！</div>
+            </div>
+
+            <p class="narrative">
+                朝5時。すべてのページが完成した。Hiroki氏は達成感とともに、コミットメッセージを書いた。
+            </p>
+
+            <div class="code-block">
+                <code><pre>git commit -m "🐛 ブログカードグリッドの幅とレイアウトを修正
+
+- minmax(0, 1fr)でグリッドカラムの均等幅を保証
+- カードにmin-width: 0とoverflow: hiddenを追加
+- タイトルと説明にword-wrapを追加して長文の折り返しを改善"</pre></code>
+            </div>
+        </div>
+
+        <div class="section-break">* * *</div>
+
+        <!-- 第5章 -->
+        <div class="chapter">
+            <div class="chapter-number">Chapter 5</div>
+            <h2 class="chapter-title">第5章 - 完成と振り返り</h2>
+
+            <p class="narrative">
+                2025年10月19日、午前10時。Hiroki氏は完成したサイトをブラウザで確認していた。
+            </p>
+
+            <div class="success-moment">
+                <div class="emoji">🎊</div>
+                <div class="text" style="margin-bottom: 1rem;">移行完了！</div>
+                <ul style="text-align: left; max-width: 600px; margin: 0 auto;">
+                    <li>✅ 102記事すべて正常に表示</li>
+                    <li>✅ 全10ページが完璧に動作</li>
+                    <li>✅ デザインはピクセルパーフェクト</li>
+                    <li>✅ TypeScript strict modeで型安全</li>
+                    <li>✅ 設計思想（KISS/YAGNI/DRY）を完全遵守</li>
+                </ul>
+            </div>
+
+            <p class="narrative">
+                彼はREADME.mdを開き、プロジェクトの成果を記録した。
+            </p>
+
+            <div class="comparison">
+                <div class="comparison-item go">
+                    <div class="comparison-title">🐹 Before (Go版)</div>
+                    <ul style="margin-left: 1.5rem;">
+                        <li>コスト: $10/月</li>
+                        <li>レンダリング: SSR</li>
+                        <li>メタデータ: switch文（300行）</li>
+                        <li>デプロイ: Railway</li>
+                        <li>開発体験: サーバー再起動必要</li>
+                    </ul>
+                </div>
+
+                <div class="comparison-item svelte">
+                    <div class="comparison-title">🔥 After (SvelteKit版)</div>
+                    <ul style="margin-left: 1.5rem;">
+                        <li>コスト: $0/月（予定）</li>
+                        <li>レンダリング: SSG</li>
+                        <li>メタデータ: frontmatter（分散）</li>
+                        <li>デプロイ: Cloudflare Pages（予定）</li>
+                        <li>開発体験: Vite HMR（即座に反映）</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="revelation">
+                <div class="title">学んだこと</div>
+                <ul style="margin-left: 1.5rem;">
+                    <li><strong>+page.server.ts</strong>: サーバーサイドのみで実行される。Node.jsモジュールを安全に使用可能</li>
+                    <li><strong>frontmatter</strong>: メタデータと本文を一元管理。保守性が劇的に向上</li>
+                    <li><strong>CSS Grid</strong>: <code>minmax(0, 1fr)</code>で均等幅を保証</li>
+                    <li><strong>TypeScript</strong>: strict modeで型安全性を確保。バグを未然に防ぐ</li>
+                    <li><strong>設計思想</strong>: KISS/YAGNI/DRYを実践。シンプルで保守しやすいコード</li>
+                </ul>
+            </div>
+
+            <div class="dialogue">
+                <div class="speaker">Hiroki氏の独白</div>
+                <p>「これは単なる技術の置き換えではなかった。より良いアーキテクチャへの進化だ。メタデータの分散管理、静的サイト生成、無料ホスティング...すべてが理にかなっている」</p>
+                <p>「そして何より、TypeScriptとSvelteKitを習得できた。これで、フリーランス案件の幅が広がる。この投資は、必ず報われる」</p>
+            </div>
+
+            <p class="narrative">
+                彼は最後のコミットを作成した。
+            </p>
+
+            <div class="code-block">
+                <code><pre>git commit -m "📝 README.mdを更新
+
+- 記事数を95→102に更新
+- ページ数を9→10に更新し、具体的なページ名を記載
+- 主な機能セクションを追加（レスポンシブ、ブログ、SEO対応）
+- 最近の更新履歴を追加
+- 最終更新日を2025-10-19に更新"</pre></code>
+            </div>
+
+            <p class="narrative">
+                次のステップは、Cloudflare Pagesへのデプロイだ。しかし、今はこの達成感を味わいたかった。
+            </p>
+
+            <div class="thought">
+                「明日、デプロイしよう。そして、Railwayを解約する。年間120ドルの節約だ。小さな一歩かもしれないが、これが積み重なれば大きな違いになる」
+            </div>
+        </div>
+
+        <div class="section-break">* * *</div>
+
+        <!-- エピローグ -->
+        <div class="epilogue">
+            <h2>エピローグ - 新たな始まり</h2>
+
+            <p style="font-size: 1.1rem; line-height: 2; margin: 2rem 0;">
+                技術は進化し続ける。今日の最適解は、明日の負債になるかもしれない。
+            </p>
+
+            <p style="font-size: 1.1rem; line-height: 2; margin: 2rem 0;">
+                しかし、設計思想は普遍だ。KISS、YAGNI、DRY。シンプルであること、必要最小限であること、重複を避けること。これらの原則は、どんな技術スタックでも通用する。
+            </p>
+
+            <p style="font-size: 1.1rem; line-height: 2; margin: 2rem 0;">
+                Hiroki氏の旅は、まだ始まったばかりだ。SvelteKitという新しい武器を手に入れた彼は、これからさらなる高みを目指す。
+            </p>
+
+            <p style="font-size: 1.1rem; line-height: 2; margin: 2rem 0;">
+                そして、この移行プロジェクトで学んだすべてのことは、次のプロジェクトで活かされるだろう。
+            </p>
+
+            <div style="margin-top: 3rem; font-size: 1.3rem; color: var(--primary); font-weight: 700;">
+                - 完 -
+            </div>
+
+            <div style="margin-top: 2rem; color: var(--text-muted); font-style: italic;">
+                この物語は、実際のプロジェクト「infoHiroki SvelteKit移行」を基にしたフィクションです。
+            </div>
+        </div>
+    </div>
+</body>
+</html>
