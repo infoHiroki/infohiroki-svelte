@@ -4,6 +4,9 @@
 </script>
 
 <svelte:head>
+  <!-- ファビコン -->
+  <link rel="icon" type="image/svg+xml" href="/images/logo.svg">
+
   <link rel="stylesheet" href="/css/style.css">
   <script src="/js/main.js"></script>
 </svelte:head>
