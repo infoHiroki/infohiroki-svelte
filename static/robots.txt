@@ -1,0 +1,8 @@
+# robots.txt for infoHiroki
+# クローラーに sitemap.xml の位置を通知し、全ページのクロールを許可
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://infohiroki.com/sitemap.xml
