@@ -1,0 +1,36 @@
+# Cloudflare Pages用セキュリティヘッダー
+# https://developers.cloudflare.com/pages/platform/headers/
+
+/*
+  # セキュリティヘッダー
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+
+  # 不要なブラウザAPI機能を無効化
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=()
+
+  # Content Security Policy（Google Analytics対応）
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://www.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com; frame-ancestors 'none'
+
+  # HSTS（HTTP Strict Transport Security）- Cloudflareが自動設定するため省略可
+  # Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+# キャッシュ制御
+/css/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/js/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/images/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTMLファイルはキャッシュしない
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# sitemap.xmlは1時間キャッシュ
+/sitemap.xml
+  Cache-Control: public, max-age=3600, must-revalidate
