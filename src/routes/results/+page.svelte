@@ -1,10 +1,10 @@
 <svelte:head>
   <title>生成AI導入実績 | infoHiroki</title>
-  <meta name="description" content="桜十字福岡病院様、MEO対策企業様をはじめとする生成AI導入実績をご紹介">
+  <meta name="description" content="医療機関様、デジタルマーケティング企業様をはじめとする生成AI導入実績をご紹介">
 
   <!-- OGPタグ -->
   <meta property="og:title" content="生成AI導入実績 | infoHiroki">
-  <meta property="og:description" content="桜十字福岡病院様、MEO対策企業様をはじめとする生成AI導入実績をご紹介">
+  <meta property="og:description" content="医療機関様、デジタルマーケティング企業様をはじめとする生成AI導入実績をご紹介">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="infoHiroki">
   <meta property="og:locale" content="ja_JP">
@@ -30,7 +30,7 @@
       <div class="card-grid">
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title">桜十字福岡病院様</h3>
+            <h3 class="card-title">総合病院様</h3>
             <p class="card-subtitle">医療業界 - Whisper活用議事録自動化システム導入</p>
           </div>
           <div class="card-body">
@@ -90,7 +90,7 @@
 
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title">MEO対策企業様</h3>
+            <h3 class="card-title">デジタルマーケティング企業様</h3>
             <p class="card-subtitle">IT業界 - 大規模言語モデル活用支援</p>
           </div>
           <div class="card-body">
