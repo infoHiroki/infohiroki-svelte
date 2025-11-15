@@ -24,8 +24,26 @@
       <img src="/images/logo.svg" alt="infoHiroki Logo" width="36" height="36">
       <span class="mobile-title">infoHiroki</span>
     </a>
-    <button class="theme-toggle" on:click={handleToggleTheme} aria-label="ダークモード切替">
-      <span class="theme-icon">{currentTheme === 'dark' ? '☀️' : '🌙'}</span>
+    <button class="theme-toggle" on:click={handleToggleTheme} aria-label="テーマ切替">
+      {#if currentTheme === 'dark'}
+        <!-- 太陽アイコン（ライトモードへ切替） -->
+        <svg class="theme-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"/>
+          <line x1="12" y1="1" x2="12" y2="4"/>
+          <line x1="12" y1="20" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/>
+          <line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="4" y2="12"/>
+          <line x1="20" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/>
+          <line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/>
+        </svg>
+      {:else}
+        <!-- 月アイコン（ダークモードへ切替） -->
+        <svg class="theme-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      {/if}
     </button>
     <button class="hamburger-button" aria-label="メニューを開く">
       <span class="hamburger-line"></span>
@@ -75,11 +93,14 @@
         <a href="/contact" class="nav-link">お問い合わせ</a>
       </li>
     </ul>
-    <button class="theme-toggle-sidebar" on:click={handleToggleTheme} aria-label="テーマ切替">
-      <span class="theme-icon">{currentTheme === 'dark' ? '☀️' : '🌙'}</span>
-      <span class="theme-label">{currentTheme === 'dark' ? 'ライト' : 'ダーク'}</span>
-    </button>
   </nav>
+
+  <!-- テーマ切り替えボタン（サイドバー最下部） -->
+  <div class="sidebar-footer">
+    <button class="theme-toggle-btn" on:click={handleToggleTheme} aria-label="テーマ切替">
+      {currentTheme === 'dark' ? 'ライト' : 'ダーク'}
+    </button>
+  </div>
 </aside>
 
 <!-- モバイル用オーバーレイ -->
