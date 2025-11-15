@@ -62,7 +62,7 @@
   }
   
   time {
-    color: #666;
+    color: var(--color-text-light);
     font-size: 0.9rem;
   }
   
@@ -73,7 +73,7 @@
   }
   
   .description {
-    color: #666;
+    color: var(--color-text-light);
     font-size: 1rem;
     line-height: 1.6;
     margin: 1rem 0;
@@ -87,17 +87,17 @@
   }
   
   .tag {
-    background: #f0f0f0;
+    background: var(--color-border);
     padding: 0.25rem 0.75rem;
     border-radius: 12px;
     font-size: 0.8rem;
-    color: #555;
+    color: var(--color-text-light);
   }
   
   .article-content {
     line-height: 1.8;
     font-size: 1rem;
-    color: #333;
+    color: var(--color-text);
   }
   
   .article-content :global(h1) {
@@ -132,15 +132,17 @@
   }
   
   .article-content :global(code) {
-    background: #f5f5f5;
+    background: var(--color-border);
+    color: var(--color-text);
     padding: 0.2rem 0.4rem;
     border-radius: 3px;
     font-family: 'Courier New', monospace;
     font-size: 0.9em;
   }
-  
+
   .article-content :global(pre) {
-    background: #f5f5f5;
+    background: var(--color-border);
+    color: var(--color-text);
     padding: 1rem;
     border-radius: 5px;
     overflow-x: auto;
@@ -153,10 +155,10 @@
   }
   
   .article-content :global(blockquote) {
-    border-left: 4px solid #ddd;
+    border-left: 4px solid var(--color-border);
     padding-left: 1rem;
     margin: 1rem 0;
-    color: #666;
+    color: var(--color-text-light);
     font-style: italic;
   }
   
@@ -175,13 +177,14 @@
   
   .article-content :global(th),
   .article-content :global(td) {
-    border: 1px solid #ddd;
+    border: 1px solid var(--color-border);
     padding: 0.75rem;
     text-align: left;
   }
-  
+
   .article-content :global(th) {
-    background: #f5f5f5;
+    background: var(--color-border);
+    color: var(--color-text);
     font-weight: bold;
   }
   
