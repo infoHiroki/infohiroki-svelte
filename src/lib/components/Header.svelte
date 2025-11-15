@@ -9,7 +9,13 @@
   let currentTheme: Theme = 'light';
 
   onMount(() => {
-    currentTheme = getCurrentTheme();
+    // 現在のテーマを取得して、確実にdata-theme属性を設定
+    const theme = getCurrentTheme();
+    currentTheme = theme;
+    // data-theme属性が設定されていることを確認（+layout.svelteのスクリプトで設定済みのはず）
+    if (document.documentElement.getAttribute('data-theme') !== theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
   });
 
   function handleToggleTheme() {
