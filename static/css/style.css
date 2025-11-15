@@ -880,6 +880,11 @@ button.nav-link:focus-visible {
   }
 }
 
+/* ダークモード用ヒーロー画像 */
+[data-theme="dark"] .hero-with-bg {
+  background-image: url('../images/hero-dark.svg');
+}
+
 
 .hero-title {
   font-size: 3rem;
