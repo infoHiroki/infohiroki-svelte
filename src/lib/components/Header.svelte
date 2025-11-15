@@ -1,8 +1,20 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import { onMount } from 'svelte';
+  import { toggleTheme, getCurrentTheme, type Theme } from '$lib/utils/theme';
 
   $: currentPath = $page.url.pathname;
   $: isActive = (path: string) => currentPath === path;
+
+  let currentTheme: Theme = 'light';
+
+  onMount(() => {
+    currentTheme = getCurrentTheme();
+  });
+
+  function handleToggleTheme() {
+    currentTheme = toggleTheme();
+  }
 </script>
 
 <!-- モバイル用ヘッダー -->
@@ -12,6 +24,9 @@
       <img src="/images/logo.svg" alt="infoHiroki Logo" width="36" height="36">
       <span class="mobile-title">infoHiroki</span>
     </a>
+    <button class="theme-toggle" on:click={handleToggleTheme} aria-label="ダークモード切替">
+      <span class="theme-icon">{currentTheme === 'dark' ? '☀️' : '🌙'}</span>
+    </button>
     <button class="hamburger-button" aria-label="メニューを開く">
       <span class="hamburger-line"></span>
       <span class="hamburger-line"></span>
@@ -60,6 +75,10 @@
         <a href="/contact" class="nav-link">お問い合わせ</a>
       </li>
     </ul>
+    <button class="theme-toggle-sidebar" on:click={handleToggleTheme} aria-label="テーマ切替">
+      <span class="theme-icon">{currentTheme === 'dark' ? '☀️' : '🌙'}</span>
+      <span class="theme-label">{currentTheme === 'dark' ? 'ライト' : 'ダーク'}</span>
+    </button>
   </nav>
 </aside>
 
