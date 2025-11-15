@@ -13,6 +13,7 @@ infoHiroki Website SvelteKit版（Go版からの完全移植）
 - **Markdownブログ**: 102記事のフロントマター付きMarkdown記事
 - **静的サイト生成**: サーバーレス・無料ホスティング対応
 - **SEO完全対応**: メタタグ、OGP、サイトマップ対応
+- **多言語対応**: 日本語・英語の完全サポート（手動i18n、ゼロ依存）
 
 ## 🏗️ 技術アーキテクチャ
 
@@ -31,6 +32,7 @@ SvelteKit + TypeScript + Static Adapter（静的サイト生成）
 | **Frontmatter解析** | gray-matter | 4.x | YAML frontmatter標準ライブラリ |
 | **ビルドツール** | Vite | 5.x | 高速ビルド・HMR対応 |
 | **CSS** | 既存CSS移植 | - | 1,958行の完全デザインシステムを維持 |
+| **i18n（国際化）** | 手動実装 | - | ゼロ依存・TypeScript型安全・パスベースルーティング |
 
 ### 移植元（Go版）との比較
 | 項目 | Go版 | SvelteKit版 |
@@ -58,8 +60,11 @@ infohiroki-svelte/
 ├── src/
 │   ├── lib/
 │   │   ├── components/
-│   │   │   ├── Header.svelte   # モバイル/デスクトップ対応ヘッダー
+│   │   │   ├── Header.svelte   # モバイル/デスクトップ対応ヘッダー（言語切り替え対応）
 │   │   │   └── Footer.svelte   # フッターコンポーネント
+│   │   ├── i18n/
+│   │   │   ├── index.ts        # 翻訳ヘルパー関数
+│   │   │   └── translations.ts # 日本語・英語翻訳データ（1,450+行）
 │   │   ├── types/
 │   │   │   └── blog.ts         # BlogPost型定義
 │   │   ├── utils/
@@ -74,20 +79,35 @@ infohiroki-svelte/
 │   └── routes/
 │       ├── +layout.svelte      # グローバルレイアウト
 │       ├── +layout.ts          # プリレンダー設定
-│       ├── +page.svelte        # ホームページ
+│       ├── +page.svelte        # ホームページ（日本語）
 │       ├── +error.svelte       # 404エラーページ
-│       ├── blog/
+│       ├── blog/               # 日本語ブログ
 │       │   ├── +page.ts        # ブログ一覧データ取得
 │       │   ├── +page.svelte    # ブログ一覧ページ
 │       │   └── [slug]/
 │       │       ├── +page.ts    # 記事詳細データ取得
 │       │       └── +page.svelte # 記事詳細ページ
-│       ├── services/+page.svelte    # サービスページ
-│       ├── products/+page.svelte    # 開発製品ページ
-│       ├── results/+page.svelte     # 実績ページ
-│       ├── about/+page.svelte       # スキルスタックページ
-│       ├── faq/+page.svelte         # FAQページ
-│       └── contact/+page.svelte     # お問い合わせページ
+│       ├── en/                 # 英語版ページ（110ページ）
+│       │   ├── +page.svelte    # 英語ホームページ
+│       │   ├── about/+page.svelte      # 英語About
+│       │   ├── blog/
+│       │   │   ├── +page.server.ts    # 英語ブログ一覧データ取得
+│       │   │   ├── +page.svelte       # 英語ブログ一覧
+│       │   │   └── [slug]/
+│       │   │       ├── +page.server.ts # 英語記事詳細データ取得
+│       │   │       └── +page.svelte    # 英語記事詳細
+│       │   ├── contact/+page.svelte    # 英語Contact
+│       │   ├── faq/+page.svelte        # 英語FAQ
+│       │   ├── products/+page.svelte   # 英語Products
+│       │   ├── results/+page.svelte    # 英語Results
+│       │   └── services/+page.svelte   # 英語Services
+│       ├── services/+page.svelte    # サービスページ（日本語）
+│       ├── products/+page.svelte    # 開発製品ページ（日本語）
+│       ├── results/+page.svelte     # 実績ページ（日本語）
+│       ├── about/+page.svelte       # スキルスタックページ（日本語）
+│       ├── faq/+page.svelte         # FAQページ（日本語）
+│       ├── contact/+page.svelte     # お問い合わせページ（日本語）
+│       └── sitemap.xml/+server.ts   # サイトマップ生成（220ページ）
 │
 ├── static/                     # 静的ファイル（完全移植済み）
 │   ├── css/
@@ -449,7 +469,7 @@ Google Analytics: G-6C7H2DHNGQ
 
 #### SEO・Analytics・最適化
 - [x] **SEO対応**: 全ページOGP、Twitterカード、Canonical URL設定完了
-- [x] **sitemap.xml生成**: 110ページ（固定8 + ブログ102）を含むSEO最適化完了
+- [x] **sitemap.xml生成**: 220ページ（日本語110 + 英語110）を含むSEO最適化完了
 - [x] **robots.txt実装**: 検索エンジンクロール最適化、sitemap.xml位置通知
 - [x] **Google Analytics実装**: G-6C7H2DHNGQ 全ページトラッキング有効化
 - [x] **プリレンダー設定**: 全ページ静的サイト生成設定、日本語ID警告抑制
@@ -457,6 +477,15 @@ Google Analytics: G-6C7H2DHNGQ
   - X-Frame-Options、X-Content-Type-Options、CSP、Permissions-Policy実装
   - Strict-Transport-Security（HSTS）有効化
 - [x] **依存関係更新**: vite脆弱性修正、最新版パッケージ適用
+
+#### 多言語対応（i18n）
+- [x] **手動i18n実装**: ゼロ依存、TypeScript型安全な翻訳システム構築
+- [x] **翻訳データ作成**: 1,450+行の日本語・英語翻訳データ実装
+- [x] **英語ページ実装**: ホーム + 固定7ページ + ブログ102記事（計110ページ）
+- [x] **言語切り替え**: ヘッダーに日本語/英語切り替えボタン実装
+- [x] **パスベースルーティング**: `/` = 日本語、`/en/*` = 英語
+- [x] **SEO多言語対応**: 各言語別のOGP、Canonical URL、locale設定
+- [x] **sitemap.xml多言語化**: 220ページ登録（日本語110 + 英語110）
 
 #### デプロイ・本番運用
 - [x] **本番ビルド**: npm run build テスト成功、build/ディレクトリ生成確認
@@ -478,9 +507,11 @@ Google Analytics: G-6C7H2DHNGQ
 - **コスト削減**: 月額$5-10 → $0（年間$60-120の削減）
 - **パフォーマンス向上**: 静的サイト生成による超高速化
 - **保守性向上**: TypeScript厳格モード、コンポーネント化
-- **SEO最適化**: sitemap.xml生成、robots.txt実装、OGP完全対応
+- **SEO最適化**: sitemap.xml生成（220ページ）、robots.txt実装、OGP完全対応
 - **セキュリティ強化**: SecurityHeaders.com グレードA獲得、HSTS有効化
-- **完全移行**: 102記事 + 8固定ページすべて移行完了
+- **多言語対応**: 日本語・英語完全サポート（計220ページ）
+- **国際化**: 英語圏ユーザーへのリーチ拡大、SEO登録ページ数2倍
+- **完全移行**: 102記事 + 8固定ページ + 英語110ページすべて実装完了
 
 ## 📝 運用・保守
 
